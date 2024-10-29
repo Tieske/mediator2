@@ -1,4 +1,6 @@
-Copyright © 2012-2020 Olivine Labs
+# MIT License
+
+### Copyright © 2012-2020 Olivine Labs
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
