@@ -40,5 +40,6 @@ The scope of what is covered by the version number excludes:
 - fix: use proper 'self' instead of upvalue in channel
 - feat: add `ldoc` based documentation
 - feat: allow Subscriber to update its priority
-- BREAKING: remove the exported Channel and Subscriber functions.
+- BREAKING: remove the exported Channel and Subscriber functions. In theory breaking but
+  for most users it shouldn't matter.
 - feat: add "remove" method to Subscriber to unsubscribe
