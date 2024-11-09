@@ -8,10 +8,6 @@
 -- and more.
 -- @module mediator
 
-local function getUniqueId(obj)
-  return tonumber(tostring(obj):match(':%s*[0xX]*(%x+)'), 16)
-end
-
 
 
 --- Subscriber class.
@@ -25,18 +21,16 @@ local Subscriber = setmetatable({},{
   -- @tparam Channel channel The channel the subscriber is subscribed to.
   -- @treturn Subscriber the newly created subscriber
   __call = function(self, fn, options, channel)
-    local sub = {
-      options = options or {},
-      fn = fn,
-      channel = channel,
-    }
-    sub.id = getUniqueId(sub)
-
-    return setmetatable(sub, self)
+    return setmetatable({
+        options = options or {},
+        fn = fn,
+        channel = channel,
+      }, self)
   end
 })
 
 function Subscriber:__index(key)
+if key == "id" then error("id is gone...") end
   self[key] = Subscriber[key] -- copy method to instance for faster future access
   return Subscriber[key]
 end
@@ -53,7 +47,7 @@ function Subscriber:update(updates)
     self.fn = updates.fn or self.fn
     self.options = updates.options or self.options
     if self.options.priority then
-      self.channel:setPriority(self.id, self.options.priority)
+      self:setPriority(self.options.priority)
       self.options.priority = nil
     end
   end
@@ -61,10 +55,21 @@ end
 
 
 
+--- Changes the priority of the subscriber.
+-- @tparam number priority The new priority of the subscriber.
+-- @return the priority as set
+function Subscriber:setPriority(priority)
+  return self.channel:_setPriority(self, priority)
+end
+
+
+
 --- Removes the subscriber.
 -- @return the removed `Subscriber`
 function Subscriber:remove()
-  return self.channel:removeSubscriber(self.id)
+  local channel = self.channel
+  self.channel = nil
+  return channel:_removeSubscriber(self)
 end
 
 
@@ -117,40 +122,29 @@ end
 
 
 
---- Gets a subscriber by its id.
--- @tparam number id The id of the subscriber to get.
--- @return table or nil if not found. The table will have field `index` with the index (or priority)
--- of the subscriber in its channel, and field `value` with the subscriber object itself.
-function Channel:getSubscriber(id)
-  for i, callback in ipairs(self.subscribers) do
-    if callback.id == id then return { index = i, value = callback } end
-  end
-  for _, channel in pairs(self.channels) do
-    local sub = channel:getSubscriber(id)
-    if sub then return sub end
-  end
-end
-
-
-
---- Sets the priority of a subscriber.
+-- Sets the priority of a subscriber.
 -- @tparam number id The id of the subscriber to set the priority of.
 -- @tparam number priority The new priority of the subscriber.
--- @return nothing
-function Channel:setPriority(id, priority)
-  local callback = self:getSubscriber(id)
-
+-- @return the priority set
+function Channel:_setPriority(subscriber, priority)
   priority = math.max(math.min(math.floor(priority), #self.subscribers), 1)
 
-  -- TODO: fix bug; getSubscriber will recursively search through all child-namespaces, so
-  -- the subscriber might reside in ANOTHER channel. But below we're assuming that the `index`
-  -- is valid for THIS channel.
-  if callback.value then
-    table.remove(self.subscribers, callback.index)
-    table.insert(self.subscribers, priority, callback.value)
+  local index
+  for i, callback in ipairs(self.subscribers) do
+    if callback == subscriber then
+      index = i
+      break
+    end
   end
-end
 
+  if not index then
+    error("Subscriber not found") -- this is an internal error, should never happen
+  end
+
+  table.remove(self.subscribers, index)
+  table.insert(self.subscribers, priority, subscriber)
+  return priority
+end
 
 
 --- Adds a namespace/sub-channel to the channel.
@@ -181,29 +175,28 @@ end
 
 
 
---- Removes a subscriber.
+-- Removes a subscriber.
 -- @tparam number id The id of the subscriber to remove.
--- @treturn Subscriber the removed subscriber, or nil if not found
-function Channel:removeSubscriber(id)
-  local callback = self:getSubscriber(id)
-
-  if callback and callback.value then
-    for _, channel in pairs(self.channels) do
-      channel:removeSubscriber(id)
+-- @treturn Subscriber the removed subscriber
+function Channel:_removeSubscriber(subscriber)
+  for i, callback in ipairs(self.subscribers) do
+    if subscriber == callback then
+      table.remove(self.subscribers, i)
+      return subscriber
     end
-
-    return table.remove(self.subscribers, callback.index)
   end
+  -- TODO: add test for this error
+  error("Subscriber not found")
 end
 
 
 
---- Publishes to the channel.
+-- Publishes to the channel.
 -- After publishing is complete, the parent channel will be published to as well.
 -- @tparam table result Return values (first only) from the callbacks will be stored in this table
 -- @param ... The arguments to pass to the subscribers.
 -- @treturn table The result table after all subscribers have been called.
-function Channel:publish(result, ...)
+function Channel:_publish(result, ...)
   for i = 1, #self.subscribers do
     local callback = self.subscribers[i]
 
@@ -218,10 +211,20 @@ function Channel:publish(result, ...)
   end
 
   if self.parent then
-    return self.parent:publish(result, ...)
+    return self.parent:_publish(result, ...)
   else
     return result
   end
+end
+
+
+
+--- Publishes to the channel.
+-- After publishing is complete, the parent channel will be published to as well.
+-- @param ... The arguments to pass to the subscribers.
+-- @treturn table The result table after all subscribers have been called.
+function Channel:publish(...)
+  return self:_publish({}, ...)
 end
 
 
@@ -251,8 +254,8 @@ end
 function Mediator:getChannel(channelNamespace)
   local channel = self.channel
 
-  for i=1, #channelNamespace do
-    channel = channel:getChannel(channelNamespace[i])
+  for _, namespace in ipairs(channelNamespace) do
+    channel = channel:getChannel(namespace)
   end
 
   return channel
@@ -277,37 +280,12 @@ end
 
 
 
---- Gets a channel subscriber by its id.
--- @tparam number id The id of the subscriber to get.
--- @tparam array channelNamespace The namespace-array of the channel to get the subscriber from (created if it doesn't exist).
--- @return table or nil if not found. The table will have field `index` with the index (or priority)
--- of the subscriber in its channel, and field `value` with the subscriber object itself.
-function Mediator:getSubscriber(id, channelNamespace)
-  -- TODO: channel:getSubscriber will recursivly search through all child-namespaces, so
-  -- we don't need the channelNamespace parameter here. It should default to the `root` channel
-  return self:getChannel(channelNamespace):getSubscriber(id)
-end
-
-
-
---- Removes a subscriber.
--- @tparam number id The id of the subscriber to remove.
--- @tparam array channelNamespace The namespace-array of the channel to remove the subscriber from (created if it doesn't exist).
--- @treturn Subscriber the removed subscriber, or nil if not found
-function Mediator:removeSubscriber(id, channelNamespace)
-  -- TODO: channel:getSubscriber will recursivly search through all child-namespaces, so
-  -- we don't need the channelNamespace parameter here. It should default to the `root` channel
-  return self:getChannel(channelNamespace):removeSubscriber(id)
-end
-
-
-
 --- Publishes to a channel (and its parents).
 -- @tparam array channelNamespace The namespace-array of the channel to publish to (created if it doesn't exist).
 -- @param ... The arguments to pass to the subscribers.
 -- @treturn table The result table after all subscribers have been called.
 function Mediator:publish(channelNamespace, ...)
-  return self:getChannel(channelNamespace):publish({}, ...)
+  return self:getChannel(channelNamespace):publish(...)
 end
 
 

@@ -43,3 +43,5 @@ The scope of what is covered by the version number excludes:
 - BREAKING: remove the exported Channel and Subscriber functions. In theory breaking but
   for most users it shouldn't matter.
 - feat: add "remove" method to Subscriber to unsubscribe
+- BREAKING: remove the subscriber `id`, instead use subscriber object itself. Several
+  methods changed signature or were removed.

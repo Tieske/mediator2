@@ -72,65 +72,53 @@ mediator:<span class="function-name">subscribe</span>({<span class="string">"cha
 <h2><a href="#Class_Subscriber">Class Subscriber </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#subscriber:update">subscriber:update (updates)</a></td>
+	<td class="name" nowrap><a href="#Subscriber:remove">Subscriber:remove ()</a></td>
+	<td class="summary">Removes the subscriber.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Subscriber:setPriority">Subscriber:setPriority (priority)</a></td>
+	<td class="summary">Changes the priority of the subscriber.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Subscriber:update">Subscriber:update (updates)</a></td>
 	<td class="summary">Updates the subscriber with new options.</td>
 	</tr>
 </table>
 <h2><a href="#Class_Channel">Class Channel </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#channel:addChannel">channel:addChannel (namespace)</a></td>
+	<td class="name" nowrap><a href="#Channel:addChannel">Channel:addChannel (namespace)</a></td>
 	<td class="summary">Adds a namespace/sub-channel to the channel.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#channel:addSubscriber">channel:addSubscriber (fn, options)</a></td>
+	<td class="name" nowrap><a href="#Channel:addSubscriber">Channel:addSubscriber (fn, options)</a></td>
 	<td class="summary">Creates a subscriber and adds it to the channel.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#channel:getChannel">channel:getChannel (namespace)</a></td>
+	<td class="name" nowrap><a href="#Channel:getChannel">Channel:getChannel (namespace)</a></td>
 	<td class="summary">Gets a namespace/sub-channel, or creates it if it doesn't exist.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#channel:getSubscriber">channel:getSubscriber (id)</a></td>
-	<td class="summary">Gets a subscriber by its id.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#channel:hasChannel">channel:hasChannel (namespace)</a></td>
+	<td class="name" nowrap><a href="#Channel:hasChannel">Channel:hasChannel (namespace)</a></td>
 	<td class="summary">Checks if a namespace/sub-channel exists.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#channel:publish">channel:publish (result, ...)</a></td>
+	<td class="name" nowrap><a href="#Channel:publish">Channel:publish (...)</a></td>
 	<td class="summary">Publishes to the channel.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#channel:removeSubscriber">channel:removeSubscriber (id)</a></td>
-	<td class="summary">Removes a subscriber.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#channel:setPriority">channel:setPriority (id, priority)</a></td>
-	<td class="summary">Sets the priority of a subscriber.</td>
 	</tr>
 </table>
 <h2><a href="#Class_Mediator">Class Mediator </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#mediator:getChannel">mediator:getChannel (channelNamespace)</a></td>
+	<td class="name" nowrap><a href="#Mediator:getChannel">Mediator:getChannel (channelNamespace)</a></td>
 	<td class="summary">Gets a channel by its namespace, or creates it if it doesn't exist.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#mediator:getSubscriber">mediator:getSubscriber (id, channelNamespace)</a></td>
-	<td class="summary">Gets a channel subscriber by its id.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#mediator:publish">mediator:publish (channelNamespace, ...)</a></td>
+	<td class="name" nowrap><a href="#Mediator:publish">Mediator:publish (channelNamespace, ...)</a></td>
 	<td class="summary">Publishes to a channel (and its parents).</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#mediator:removeSubscriber">mediator:removeSubscriber (id, channelNamespace)</a></td>
-	<td class="summary">Removes a subscriber.</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#mediator:subscribe">mediator:subscribe (channelNamespace, fn, options)</a></td>
+	<td class="name" nowrap><a href="#Mediator:subscribe">Mediator:subscribe (channelNamespace, fn, options)</a></td>
 	<td class="summary">Subscribes to a channel.</td>
 	</tr>
 </table>
@@ -143,12 +131,57 @@ mediator:<span class="function-name">subscribe</span>({<span class="string">"cha
 
           <div class="section-description">
           Subscriber class.
- This class is instantiated by the <a href="index.html#mediator:subscribe">mediator:subscribe</a> method.
+ This class is instantiated by the <a href="index.html#Mediator:subscribe">mediator:subscribe</a> method.
           </div>
     <dl class="function">
     <dt>
-    <a name = "subscriber:update"></a>
-    <strong>subscriber:update (updates)</strong>
+    <a name = "Subscriber:remove"></a>
+    <strong>Subscriber:remove ()</strong>
+    </dt>
+    <dd>
+    Removes the subscriber.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the removed <a href="index.html#Subscriber">Subscriber</a>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Subscriber:setPriority"></a>
+    <strong>Subscriber:setPriority (priority)</strong>
+    </dt>
+    <dd>
+    Changes the priority of the subscriber.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">priority</span>
+            <span class="types"><span class="type">number</span></span>
+         The new priority of the subscriber.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        the priority as set
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Subscriber:update"></a>
+    <strong>Subscriber:update (updates)</strong>
     </dt>
     <dd>
     Updates the subscriber with new options.
@@ -165,7 +198,7 @@ mediator:<span class="function-name">subscribe</span>({<span class="string">"cha
         </li>
         <li><span class="parameter">options</span>
             <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
-         The new options for the subscriber, see <a href="index.html#mediator:subscribe">mediator:subscribe</a> for fields.
+         The new options for the subscriber, see <a href="index.html#Mediator:subscribe">mediator:subscribe</a> for fields.
          (<em>optional</em>)
         </li>
         </li></ul>
@@ -187,12 +220,12 @@ mediator:<span class="function-name">subscribe</span>({<span class="string">"cha
           <div class="section-description">
           Channel class.
  This class is instantiated automatically by accessing channels (passing the namespace-array) to the
- <a href="index.html#">mediator</a> methods. To create or access one use <a href="index.html#mediator:getChannel">mediator:getChannel</a>.
+ <a href="index.html#">mediator</a> methods. To create or access one use <a href="index.html#Mediator:getChannel">mediator:getChannel</a>.
           </div>
     <dl class="function">
     <dt>
-    <a name = "channel:addChannel"></a>
-    <strong>channel:addChannel (namespace)</strong>
+    <a name = "Channel:addChannel"></a>
+    <strong>Channel:addChannel (namespace)</strong>
     </dt>
     <dd>
     Adds a namespace/sub-channel to the channel.
@@ -218,8 +251,8 @@ mediator:<span class="function-name">subscribe</span>({<span class="string">"cha
 
 </dd>
     <dt>
-    <a name = "channel:addSubscriber"></a>
-    <strong>channel:addSubscriber (fn, options)</strong>
+    <a name = "Channel:addSubscriber"></a>
+    <strong>Channel:addSubscriber (fn, options)</strong>
     </dt>
     <dd>
     Creates a subscriber and adds it to the channel.
@@ -233,7 +266,7 @@ mediator:<span class="function-name">subscribe</span>({<span class="string">"cha
         </li>
         <li><span class="parameter">options</span>
             <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
-         A table of options for the subscriber. See <a href="index.html#mediator:subscribe">mediator:subscribe</a> for fields.
+         A table of options for the subscriber. See <a href="index.html#Mediator:subscribe">mediator:subscribe</a> for fields.
         </li>
     </ul>
 
@@ -249,8 +282,8 @@ mediator:<span class="function-name">subscribe</span>({<span class="string">"cha
 
 </dd>
     <dt>
-    <a name = "channel:getChannel"></a>
-    <strong>channel:getChannel (namespace)</strong>
+    <a name = "Channel:getChannel"></a>
+    <strong>Channel:getChannel (namespace)</strong>
     </dt>
     <dd>
     Gets a namespace/sub-channel, or creates it if it doesn't exist.
@@ -276,35 +309,8 @@ mediator:<span class="function-name">subscribe</span>({<span class="string">"cha
 
 </dd>
     <dt>
-    <a name = "channel:getSubscriber"></a>
-    <strong>channel:getSubscriber (id)</strong>
-    </dt>
-    <dd>
-    Gets a subscriber by its id.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">id</span>
-            <span class="types"><span class="type">number</span></span>
-         The id of the subscriber to get.
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-        table or nil if not found. The table will have field <code>index</code> with the index (or priority)
- of the subscriber in its channel, and field <code>value</code> with the subscriber object itself.
-    </ol>
-
-
-
-
-</dd>
-    <dt>
-    <a name = "channel:hasChannel"></a>
-    <strong>channel:hasChannel (namespace)</strong>
+    <a name = "Channel:hasChannel"></a>
+    <strong>Channel:hasChannel (namespace)</strong>
     </dt>
     <dd>
     Checks if a namespace/sub-channel exists.
@@ -330,8 +336,8 @@ mediator:<span class="function-name">subscribe</span>({<span class="string">"cha
 
 </dd>
     <dt>
-    <a name = "channel:publish"></a>
-    <strong>channel:publish (result, ...)</strong>
+    <a name = "Channel:publish"></a>
+    <strong>Channel:publish (...)</strong>
     </dt>
     <dd>
     Publishes to the channel.
@@ -340,10 +346,6 @@ mediator:<span class="function-name">subscribe</span>({<span class="string">"cha
 
     <h3>Parameters:</h3>
     <ul>
-        <li><span class="parameter">result</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
-         Return values (first only) from the callbacks will be stored in this table
-        </li>
         <li><span class="parameter">...</span>
          The arguments to pass to the subscribers.
         </li>
@@ -360,63 +362,6 @@ mediator:<span class="function-name">subscribe</span>({<span class="string">"cha
 
 
 </dd>
-    <dt>
-    <a name = "channel:removeSubscriber"></a>
-    <strong>channel:removeSubscriber (id)</strong>
-    </dt>
-    <dd>
-    Removes a subscriber.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">id</span>
-            <span class="types"><span class="type">number</span></span>
-         The id of the subscriber to remove.
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-           <span class="types"><a class="type" href="index.html#Subscriber">Subscriber</a></span>
-        the removed subscriber, or nil if not found
-    </ol>
-
-
-
-
-</dd>
-    <dt>
-    <a name = "channel:setPriority"></a>
-    <strong>channel:setPriority (id, priority)</strong>
-    </dt>
-    <dd>
-    Sets the priority of a subscriber.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">id</span>
-            <span class="types"><span class="type">number</span></span>
-         The id of the subscriber to set the priority of.
-        </li>
-        <li><span class="parameter">priority</span>
-            <span class="types"><span class="type">number</span></span>
-         The new priority of the subscriber.
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-        nothing
-    </ol>
-
-
-
-
-</dd>
 </dl>
     <h2 class="section-header has-description"><a name="Class_Mediator"></a>Class Mediator </h2>
 
@@ -426,8 +371,8 @@ mediator:<span class="function-name">subscribe</span>({<span class="string">"cha
           </div>
     <dl class="function">
     <dt>
-    <a name = "mediator:getChannel"></a>
-    <strong>mediator:getChannel (channelNamespace)</strong>
+    <a name = "Mediator:getChannel"></a>
+    <strong>Mediator:getChannel (channelNamespace)</strong>
     </dt>
     <dd>
     Gets a channel by its namespace, or creates it if it doesn't exist.
@@ -453,39 +398,8 @@ mediator:<span class="function-name">subscribe</span>({<span class="string">"cha
 
 </dd>
     <dt>
-    <a name = "mediator:getSubscriber"></a>
-    <strong>mediator:getSubscriber (id, channelNamespace)</strong>
-    </dt>
-    <dd>
-    Gets a channel subscriber by its id.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">id</span>
-            <span class="types"><span class="type">number</span></span>
-         The id of the subscriber to get.
-        </li>
-        <li><span class="parameter">channelNamespace</span>
-            <span class="types"><span class="type">array</span></span>
-         The namespace-array of the channel to get the subscriber from (created if it doesn't exist).
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-        table or nil if not found. The table will have field <code>index</code> with the index (or priority)
- of the subscriber in its channel, and field <code>value</code> with the subscriber object itself.
-    </ol>
-
-
-
-
-</dd>
-    <dt>
-    <a name = "mediator:publish"></a>
-    <strong>mediator:publish (channelNamespace, ...)</strong>
+    <a name = "Mediator:publish"></a>
+    <strong>Mediator:publish (channelNamespace, ...)</strong>
     </dt>
     <dd>
     Publishes to a channel (and its parents).
@@ -514,39 +428,8 @@ mediator:<span class="function-name">subscribe</span>({<span class="string">"cha
 
 </dd>
     <dt>
-    <a name = "mediator:removeSubscriber"></a>
-    <strong>mediator:removeSubscriber (id, channelNamespace)</strong>
-    </dt>
-    <dd>
-    Removes a subscriber.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">id</span>
-            <span class="types"><span class="type">number</span></span>
-         The id of the subscriber to remove.
-        </li>
-        <li><span class="parameter">channelNamespace</span>
-            <span class="types"><span class="type">array</span></span>
-         The namespace-array of the channel to remove the subscriber from (created if it doesn't exist).
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-           <span class="types"><a class="type" href="index.html#Subscriber">Subscriber</a></span>
-        the removed subscriber, or nil if not found
-    </ol>
-
-
-
-
-</dd>
-    <dt>
-    <a name = "mediator:subscribe"></a>
-    <strong>mediator:subscribe (channelNamespace, fn, options)</strong>
+    <a name = "Mediator:subscribe"></a>
+    <strong>Mediator:subscribe (channelNamespace, fn, options)</strong>
     </dt>
     <dd>
     Subscribes to a channel.
@@ -599,7 +482,7 @@ mediator:<span class="function-name">subscribe</span>({<span class="string">"cha
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
-<i style="float:right;">Last updated 2024-11-09 13:51:12 </i>
+<i style="float:right;">Last updated 2024-11-09 23:55:59 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

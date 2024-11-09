@@ -42,20 +42,11 @@ describe("mediator", function()
     assert.are.equal(c.subscribers[1].fn, sub3.fn)
   end)
 
-  it("can return subscribers", function()
-    local sub1 = c:addSubscriber(testfn)
-    c:addSubscriber(testfn2)
-
-    local gotten = c:getSubscriber(sub1.id)
-
-    assert.are.equal(gotten.value, sub1)
-  end)
-
   it("can change subscriber priority forward after being added", function()
     c:addSubscriber(testfn)
     local sub2 = c:addSubscriber(testfn2)
 
-    c:setPriority(sub2.id, 1)
+    sub2:setPriority(1)
 
     assert.are.equal(c.subscribers[1], sub2)
   end)
@@ -64,7 +55,7 @@ describe("mediator", function()
     local sub1 = c:addSubscriber(testfn)
     c:addSubscriber(testfn2)
 
-    c:setPriority(sub1.id, 2)
+    sub1:setPriority(2)
 
     assert.are.equal(c.subscribers[2], sub1)
   end)
@@ -84,11 +75,11 @@ describe("mediator", function()
     assert.are.equal(c.subscribers[1], sub1)
     assert.are.equal(c.subscribers[2], sub2)
 
-    c:setPriority(sub1.id, 99)
+    sub1:setPriority(99)
     assert.are.equal(c.subscribers[2], sub1)
     assert.are.equal(c.subscribers[1], sub2)
 
-    c:setPriority(sub1.id, 0)
+    sub1:setPriority(0)
     assert.are.equal(c.subscribers[1], sub1)
     assert.are.equal(c.subscribers[2], sub2)
   end)
@@ -108,43 +99,14 @@ describe("mediator", function()
     assert.is_not.equal(c:getChannel("level2"), nil)
   end)
 
-  it("can remove subscribers by id", function()
-    c:addSubscriber(testfn)
+  it("can remove subscribers", function()
+    local sub1 = c:addSubscriber(testfn)
     local sub2 = c:addSubscriber(testfn2)
-
-    c:removeSubscriber(sub2.id)
-
-    assert.is.equal(c:getSubscriber(sub2.id), nil)
-  end)
-
-  it("can remove subscribers by calling subsriber:remove()", function()
-    c:addSubscriber(testfn)
-    local sub2 = c:addSubscriber(testfn2)
-    assert.is.not_nil(c:getSubscriber(sub2.id))
 
     sub2:remove()
 
-    assert.is_nil(c:getSubscriber(sub2.id))
-  end)
-
-  it("can return a subscriber registered to a subchannel", function()
-    c:addChannel("level2")
-
-    local sub1 = c.channels["level2"]:addSubscriber(testfn)
-
-    local gotten = c:getSubscriber(sub1.id)
-
-    assert.are.equal(gotten.value, sub1)
-  end)
-
-  it("can remove a subscriber registered to a subchannel", function()
-    c:addChannel("level2")
-
-    local sub1 = c.channels["level2"]:addSubscriber(testfn)
-
-    c:removeSubscriber(sub1.id)
-
-    assert.is.equal(c.channels["level2"]:getSubscriber(sub1.id), nil)
+    assert.is.equal(c.subscribers[1], sub1)
+    assert.is.equal(c.subscribers[2], nil)
   end)
 
   it("can publish to a channel", function()
@@ -156,7 +118,7 @@ describe("mediator", function()
     end
 
     c:addSubscriber(assertFn)
-    c:publish({}, data)
+    c:publish(data)
 
     assert.is.truthy(olddata.test)
   end)
@@ -201,7 +163,7 @@ describe("mediator", function()
     c:addSubscriber(assertFn)
     c:addSubscriber(assertFn2)
 
-    c:publish({}, data)
+    c:publish(data)
 
     assert.are.equal(olddata.test, 1)
   end)
@@ -229,11 +191,12 @@ describe("mediator", function()
   end)
 
   it("can publish to channels from the mediator level", function()
-    local assertFn = function(data, channel) end
+    local received
+    local assertFn = function(data) received = data end
 
     local s = m:subscribe({"test"}, assertFn)
-
-    assert.is_not.equal(m:getChannel({ "test" }):getSubscriber(s.id), nil)
+    m:publish({"test"}, "hi")
+    assert.are.equal(received, "hi")
   end)
 
   it("publishes to the proper subchannel", function()
@@ -248,27 +211,6 @@ describe("mediator", function()
 
     assert.spy(a).was.called(1)
     assert.spy(b).was.called(1)
-  end)
-
-  it("can return a subscriber at the mediator level", function()
-    local assertFn = function(data, channel) end
-
-    local s = m:subscribe({"test"}, assertFn)
-
-    assert.is_not.equal(m:getSubscriber(s.id, { "test" }), nil)
-  end)
-
-
-  it("can remove a subscriber at the mediator level", function()
-    local assertFn = function(data) end
-
-    local s = m:subscribe({"test"}, assertFn)
-
-    assert.is_not.equal(m:getSubscriber(s.id, { "test" }), nil)
-
-    m:removeSubscriber(s.id, {"test"})
-
-    assert.are.equal(m:getSubscriber(s.id, { "test" }), nil)
   end)
 
   it("can publish to a subscriber at the mediator level", function()
@@ -335,4 +277,5 @@ describe("mediator", function()
     assert.are.equal(olddata, "didn't read lol")
     assert.are_not.equal(olddata2, "didn't read lol")
   end)
+
 end)
