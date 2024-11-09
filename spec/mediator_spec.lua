@@ -69,6 +69,15 @@ describe("mediator", function()
     assert.are.equal(c.subscribers[2], sub1)
   end)
 
+  it("can change subscriber priority through subscriber", function()
+    local sub1 = c:addSubscriber(testfn)
+    c:addSubscriber(testfn2)
+
+    sub1:update { options = { priority = 2 } }
+    assert.are.equal(c.subscribers[2], sub1)
+    assert.is_nil(sub1. options.priority) -- must be cleared
+  end)
+
   it("keeps subscriber priority within bounds upon change", function()
     local sub1 = c:addSubscriber(testfn)
     local sub2 = c:addSubscriber(testfn2)

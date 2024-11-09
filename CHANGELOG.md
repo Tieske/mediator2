@@ -39,3 +39,4 @@ The scope of what is covered by the version number excludes:
 - fix: set channel property on subscriber, drop 'stopped' as it was unused
 - fix: use proper 'self' instead of upvalue in channel
 - feat: add `ldoc` based documentation
+- feat: allow Subscriber to update its priority

@@ -38,7 +38,10 @@ local function Subscriber(fn, options, channel)
       if updates then
         self.fn = updates.fn or self.fn
         self.options = updates.options or self.options
-        -- TODO: should we be able to change priority here? probably, since it is part of 'options'.
+        if self.options.priority then
+          self.channel:setPriority(self.id, self.options.priority)
+          self.options.priority = nil
+        end
       end
     end
   }
