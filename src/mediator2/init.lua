@@ -60,7 +60,7 @@ end
 local function Channel(namespace, parent)
   return {
     namespace = namespace,
-    callbacks = {}, -- TODO: rename to 'subscribers' for clarity?
+    subscribers = {},
     channels = {},
     parent = parent,
 
@@ -71,13 +71,13 @@ local function Channel(namespace, parent)
     addSubscriber = function(self, fn, options)
       options = options or {}
 
-      local priority = options.priority or (#self.callbacks + 1)
-      priority = math.max(math.min(math.floor(priority), #self.callbacks + 1), 1)
+      local priority = options.priority or (#self.subscribers + 1)
+      priority = math.max(math.min(math.floor(priority), #self.subscribers + 1), 1)
       options.priority = nil
 
       local callback = Subscriber(fn, options, self)
 
-      table.insert(self.callbacks, priority, callback)
+      table.insert(self.subscribers, priority, callback)
 
       return callback
     end,
@@ -87,7 +87,7 @@ local function Channel(namespace, parent)
     -- @return table or nil if not found. The table will have field `index` with the index (or priority)
     -- of the subscriber in its channel, and field `value` with the subscriber object itself.
     getSubscriber = function(self, id)
-      for i, callback in ipairs(self.callbacks) do
+      for i, callback in ipairs(self.subscribers) do
         if callback.id == id then return { index = i, value = callback } end
       end
       for _, channel in pairs(self.channels) do
@@ -103,14 +103,14 @@ local function Channel(namespace, parent)
     setPriority = function(self, id, priority)
       local callback = self:getSubscriber(id)
 
-      priority = math.max(math.min(math.floor(priority), #self.callbacks), 1)
+      priority = math.max(math.min(math.floor(priority), #self.subscribers), 1)
 
       -- TODO: fix bug; getSubscriber will recursively search through all child-namespaces, so
       -- the subscriber might reside in ANOTHER channel. But below we're assuming that the `index`
       -- is valid for THIS channel.
       if callback.value then
-        table.remove(self.callbacks, callback.index)
-        table.insert(self.callbacks, priority, callback.value)
+        table.remove(self.subscribers, callback.index)
+        table.insert(self.subscribers, priority, callback.value)
       end
     end,
 
@@ -147,7 +147,7 @@ local function Channel(namespace, parent)
           channel:removeSubscriber(id)
         end
 
-        return table.remove(self.callbacks, callback.index)
+        return table.remove(self.subscribers, callback.index)
       end
     end,
 
@@ -157,8 +157,8 @@ local function Channel(namespace, parent)
     -- @param ... The arguments to pass to the subscribers.
     -- @treturn table The result table after all subscribers have been called.
     publish = function(self, result, ...)
-      for i = 1, #self.callbacks do
-        local callback = self.callbacks[i]
+      for i = 1, #self.subscribers do
+        local callback = self.subscribers[i]
 
         -- if it doesn't have a predicate, or it does and it's true then run it
         if not callback.options.predicate or callback.options.predicate(...) then

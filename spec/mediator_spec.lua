@@ -3,7 +3,7 @@ describe("mediator", function()
   local m, c, testfn, testfn2, testfn3
 
   before_each(function()
-    Mediator = require("mediator")
+    Mediator = require("mediator2")
     m = Mediator()
     c = Mediator.Channel("test")
     testfn = function() end
@@ -22,16 +22,16 @@ describe("mediator", function()
   it("can register subscribers", function()
     c:addSubscriber(testfn)
 
-    assert.are.equal(#c.callbacks, 1)
-    assert.are.equal(c.callbacks[1].fn, testfn)
+    assert.are.equal(#c.subscribers, 1)
+    assert.are.equal(c.subscribers[1].fn, testfn)
   end)
 
   it("can register lots of subscribers", function()
     c:addSubscriber(testfn)
     local sub2 = c:addSubscriber(testfn2)
 
-    assert.are.equal(#c.callbacks, 2)
-    assert.are.equal(c.callbacks[2].fn, sub2.fn)
+    assert.are.equal(#c.subscribers, 2)
+    assert.are.equal(c.subscribers[2].fn, sub2.fn)
   end)
 
   it("can register subscribers with specified priorities", function()
@@ -39,7 +39,7 @@ describe("mediator", function()
     c:addSubscriber(testfn2)
     local sub3 = c:addSubscriber(testfn3, { priority = 1 })
 
-    assert.are.equal(c.callbacks[1].fn, sub3.fn)
+    assert.are.equal(c.subscribers[1].fn, sub3.fn)
   end)
 
   it("can return subscribers", function()
@@ -57,7 +57,7 @@ describe("mediator", function()
 
     c:setPriority(sub2.id, 1)
 
-    assert.are.equal(c.callbacks[1], sub2)
+    assert.are.equal(c.subscribers[1], sub2)
   end)
 
   it("can change subscriber priority backwards after being added", function()
@@ -66,22 +66,22 @@ describe("mediator", function()
 
     c:setPriority(sub1.id, 2)
 
-    assert.are.equal(c.callbacks[2], sub1)
+    assert.are.equal(c.subscribers[2], sub1)
   end)
 
   it("keeps subscriber priority within bounds upon change", function()
     local sub1 = c:addSubscriber(testfn)
     local sub2 = c:addSubscriber(testfn2)
-    assert.are.equal(c.callbacks[1], sub1)
-    assert.are.equal(c.callbacks[2], sub2)
+    assert.are.equal(c.subscribers[1], sub1)
+    assert.are.equal(c.subscribers[2], sub2)
 
     c:setPriority(sub1.id, 99)
-    assert.are.equal(c.callbacks[2], sub1)
-    assert.are.equal(c.callbacks[1], sub2)
+    assert.are.equal(c.subscribers[2], sub1)
+    assert.are.equal(c.subscribers[1], sub2)
 
     c:setPriority(sub1.id, 0)
-    assert.are.equal(c.callbacks[1], sub1)
-    assert.are.equal(c.callbacks[2], sub2)
+    assert.are.equal(c.subscribers[1], sub1)
+    assert.are.equal(c.subscribers[2], sub2)
   end)
 
   it("can add subchannels", function()
