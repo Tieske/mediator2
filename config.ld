@@ -1,6 +1,6 @@
-project='mediator_lua'
+project='mediator2'
 title='mediator docs'
-description='mediator_lua is a Lua implementation of the Mediator pattern.'
+description='mediator2 is a Lua implementation of the Mediator pattern.'
 
 format='markdown'
 use_markdown_titles = true

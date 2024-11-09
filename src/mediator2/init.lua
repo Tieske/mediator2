@@ -1,5 +1,5 @@
 --- Mediator pattern implementation for Lua.
--- mediator_lua allows you to subscribe and publish to a central object so
+-- mediator2 allows you to subscribe and publish to a central object so
 -- you can decouple function calls in your application. It's as simple as:
 --
 --     mediator:subscribe({"channel"}, function)
@@ -211,6 +211,8 @@ local Mediator = setmetatable(
       --- Subscribes to a channel.
       -- @tparam array channelNamespace The namespace-array of the channel to subscribe to (created if it doesn't exist).
       -- @tparam function fn The callback function to be called when the channel is published to.
+      -- signature: `anyResult, boolContinue = fn(...)` where `anyResult` is any value to be stored in the result table,
+      -- and `boolContinue` is a boolean indicating whether to continue calling the next subscriber.
       -- @tparam table options A table of options for the subscriber, with fields:
       -- @tparam[opt] function options.predicate A function that returns a boolean. If `true`, the subscriber will be called.
       -- The predicate function will be passed the arguments that were passed to the publish function.

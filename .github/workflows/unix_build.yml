@@ -36,11 +36,11 @@ jobs:
         luarocksVersion: "3.11.0"
 
     - name: dependencies
-      # install test deps, but remove default 'mediator_lua' package
+      # install test deps, but remove default 'mediator2' package
       run: |
         luarocks install busted
         luarocks install luacov-coveralls
-        luarocks remove --force mediator_lua
+        luarocks remove --force mediator2
 
     - name: build
       run: |

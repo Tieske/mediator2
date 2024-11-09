@@ -1,0 +1,296 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>mediator docs</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>mediator2</h1>
+
+
+
+
+
+<h2>Topics</h2>
+<ul class="">
+  <li><strong>01-introduction</strong></li>
+  <li><a href="../topics/CHANGELOG.md.html">CHANGELOG</a></li>
+  <li><a href="../topics/LICENSE.md.html">MIT License</a></li>
+</ul>
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../index.html">mediator</a></li>
+</ul>
+<h2>Examples</h2>
+<ul class="nowrap">
+  <li><a href="../examples/placeholder.lua.html">placeholder.lua</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+
+<h1>mediator_lua</h1>
+
+<p>Version 1.1.2</p>
+
+<p>For more information, please see</p>
+
+<p><a href="https://github.com/Tieske/mediator2">View the project on Github</a></p>
+
+<p>If you have <a href="https://luarocks.org">luarocks</a>, install it with <code>luarocks install mediator2</code>.</p>
+
+<h2>A utility class to help you manage events.</h2>
+
+<p>mediator_lua is a simple class that allows you to listen to events by subscribing to
+and sending data to channels. Its purpose is to help you decouple code where you
+might otherwise have functions calling functions calling functions, and instead
+simply call</p>
+
+
+<pre>
+mediator.<span class="function-name">publish</span>( { <span class="string">"chat"</span> }, { message = <span class="string">"hi"</span> })
+</pre>
+
+
+<h2>Why?</h2>
+
+<p>My specific use case: manage HTTP routes called in OpenResty. There's an excellent
+article that talks about the Mediator pattern (in Javascript) in more in detail by
+<a href="https://addyosmani.com/largescalejavascript/#mediatorpattern">Addy Osmani</a>
+(that made me go back and refactor this code a bit.)</p>
+
+<h2>Usage</h2>
+
+<p>You can register events with the mediator two ways: using channels, or with a
+<em>predicate</em> to perform more complex matching (a predicate is a function that
+returns a true/false value that determines if mediator should run the callback.)</p>
+
+<p>Instantiate a new mediator, and then you can be subscribing, removing, and publishing.</p>
+
+<p>Example:</p>
+
+
+<pre>
+<span class="keyword">local</span> Mediator = <span class="global">require</span> <span class="string">"mediator2"</span>
+<span class="keyword">local</span> mediator = <span class="function-name">Mediator</span>() <span class="comment">-- instantiate a new mediator
+</span>
+<span class="keyword">local</span> subscriber = mediator:<span class="function-name">subscribe</span>(
+  { <span class="string">"chat"</span>, <span class="string">"Lua"</span>, <span class="string">"mediator"</span> },  <span class="comment">-- the namespace
+</span>  <span class="keyword">function</span>(...) <span class="global">print</span>(...) <span class="keyword">end</span>,   <span class="comment">-- the callback
+</span>)
+
+mediator:<span class="function-name">publish</span>(
+  { <span class="string">"chat"</span>, <span class="string">"Lua"</span>, <span class="string">"mediator"</span> },  <span class="comment">-- channel to publish to
+</span>  <span class="string">"hello"</span>, <span class="string">"from"</span>, <span class="string">"Lua"</span>          <span class="comment">-- data to publish
+</span>)
+
+<span class="comment">--&gt;&gt; prints "hello from lua"
+</span>
+mediator:<span class="function-name">removeSubscriber</span>(subscriber.id, { <span class="string">"chat"</span>, <span class="string">"Lua"</span>, <span class="string">"mediator"</span> } )
+</pre>
+
+
+<p>Subscription callback signature:</p>
+
+
+<pre>
+<span class="keyword">local</span> result, continue = <span class="keyword">function</span>(...)
+</pre>
+
+<p>Where:</p>
+
+<ul>
+    <li><code>result</code> is a result passed back to the publisher (any type)</li>
+    <li><code>continue</code> determines whether any additional callbacks will be called</li>
+</ul>
+
+<p>Callback execution order (if <code>continue</code> remains truthy over the chain) is to
+first call the handlers for the channel, and then traverse up to the parent channel
+and call its handlers, all the way up.</p>
+
+<p>The options accepted by a subscription:</p>
+
+<pre>
+{
+  predicate = <span class="keyword">function</span>(arg1, arg2) <span class="keyword">return</span> arg1 == arg2 <span class="keyword">end</span>
+  priority = <span class="number">1</span>|<span class="number">2</span>|... (array index; max of callback array length, min of <span class="number">1</span>)
+}
+</pre>
+
+
+<p>When you call <a href="../index.html#mediator:subscribe">subscribe</a>, you get a <code>subscriber</code> object back that you can use to
+update and change options. It looks like:</p>
+
+
+
+<pre>
+{
+  id, <span class="comment">-- unique identifier
+</span>  fn, <span class="comment">-- function you passed in
+</span>  options, <span class="comment">-- options
+</span>  channel, <span class="comment">-- provides a pointer back to its channel
+</span>  <span class="function-name">update</span>(options) <span class="comment">-- function that accepts { fn, options }
+</span>}
+</pre>
+
+
+<p>Examples:</p>
+
+
+
+<pre>
+Mediator = <span class="global">require</span>(<span class="string">"mediator2"</span>)
+<span class="keyword">local</span> mediator = <span class="function-name">Mediator</span>()
+
+<span class="comment">-- Print data when the "message" channel is published to
+</span><span class="comment">-- Subscribe returns a "Subscriber" object
+</span>mediator:<span class="function-name">subscribe</span>({ <span class="string">"message"</span> }, <span class="keyword">function</span>(data) <span class="global">print</span>(data) <span class="keyword">end</span>);
+mediator:<span class="function-name">publish</span>({ <span class="string">"message"</span> }, <span class="string">"Hello, world"</span>);
+
+  &gt;&gt; Hello, world
+
+<span class="comment">-- Print the message when the predicate function returns true
+</span><span class="keyword">local</span> predicate = <span class="keyword">function</span>(data)
+  <span class="keyword">return</span> data.From == <span class="string">"Jack"</span>
+<span class="keyword">end</span>
+
+mediator.<span class="function-name">Subscribe</span>({ <span class="string">"channel"</span> }, <span class="keyword">function</span>(data) <span class="global">print</span>(data.Message) <span class="keyword">end</span>, { predicate = predicate });
+mediator.<span class="function-name">Publish</span>({ <span class="string">"channel"</span> }, { Message = <span class="string">"Hey!"</span>, From = <span class="string">"Jack"</span> })
+mediator.<span class="function-name">Publish</span>({ <span class="string">"channel"</span> }, { Message = <span class="string">"Hey!"</span>, From = <span class="string">"Drew"</span> })
+
+  &gt;&gt; Hey!
+</pre>
+
+
+<p>You can remove events by passing in a type or predicate, and optionally the
+function to remove.</p>
+
+
+
+<pre>
+<span class="comment">-- removes all methods bound to a channel
+</span>mediator:<span class="function-name">remove</span>({ <span class="string">"channel"</span> })
+
+<span class="comment">-- unregisters MethodFN, a named function we defined elsewhere, from "channel"
+</span>mediator:<span class="function-name">remove</span>({ <span class="string">"channel"</span> }, MethodFN)
+</pre>
+
+
+<p>You can call the registered functions with the <a href="../index.html#channel:publish">publish</a> method, which accepts
+an args array:</p>
+
+
+
+<pre>
+mediator:<span class="function-name">publish</span>({ <span class="string">"channel"</span> }, <span class="string">"argument"</span>, <span class="string">"another one"</span>, { etc: <span class="keyword">true</span> }); # args go on forever
+</pre>
+
+
+<p>You can namespace your subscribing / removing / publishing. This will recurisevely
+call children, and also subscribers to direct parents.</p>
+
+
+
+<pre>
+mediator:<span class="function-name">subscribe</span>({ <span class="string">"application:chat:receiveMessage"</span> }, <span class="keyword">function</span>(data){ ... })
+
+<span class="comment">-- will recursively call anything in the appllication:chat:receiveMessage namespace
+</span><span class="comment">-- will also call thins directly subscribed to application and application:chat,
+</span><span class="comment">-- but not their children
+</span>mediator:<span class="function-name">publish</span>({ <span class="string">"application"</span>, <span class="string">"chat"</span>, <span class="string">"receiveMessage"</span> }, <span class="string">"Jack Lawson"</span>, <span class="string">"Hey"</span>)
+
+<span class="comment">-- will recursively remove everything under application:chat
+</span>mediator:<span class="function-name">remove</span>({ <span class="string">"application"</span>, <span class="string">"chat"</span> })
+</pre>
+
+
+<p>You can update Subscriber priority:</p>
+
+
+
+<pre>
+<span class="keyword">local</span> sub = mediator:<span class="function-name">subscribe</span>({ <span class="string">"application"</span>, <span class="string">"chat"</span> }, <span class="keyword">function</span>(data){ ... })
+<span class="keyword">local</span> sub2 = mediator:<span class="function-name">subscribe</span>({ <span class="string">"application"</span>, <span class="string">"chat"</span> }, <span class="keyword">function</span>(data){ ... })
+
+<span class="comment">-- have sub2 executed first
+</span>mediator.<span class="function-name">GetChannel</span>({ <span class="string">"application"</span>, <span class="string">"chat"</span> }).<span class="function-name">SetPriority</span>(sub2.id, <span class="number">0</span>);
+</pre>
+
+
+<p>You can update Subscriber callback, and/or options:</p>
+
+
+
+<pre>
+sub:<span class="function-name">update</span>({ fn: ..., options = { ... }})
+</pre>
+
+
+<p>You can stop the chain of execution by calling channel:stopPropagation()</p>
+
+
+
+<pre>
+<span class="comment">-- for example, let's not post the message if the <code>from</code> and <code>to</code> are the same
+</span>mediator.<span class="function-name">Subscribe</span>({ <span class="string">"application"</span>, <span class="string">"chat"</span> }, <span class="keyword">function</span>(data, channel)
+  <span class="comment">-- throw an error message or something
+</span>  channel:<span class="function-name">stopPropagation</span>()
+<span class="keyword">end</span>, options = {
+  predicate = <span class="keyword">function</span>(data) <span class="keyword">return</span> data.From == data.To <span class="keyword">end</span>,
+  priority = <span class="number">0</span>
+})
+</pre>
+
+
+
+<h2>Testing</h2>
+
+<p>Uses <a href="https://lunarmodules.github.io/busted/">busted</a> for testing, and
+<a href="https://github.com/lunarmodules/luacheck">luacheck</a> for linting; you can install both
+through <a href="https://luarocks.org">luarocks</a>.</p>
+
+<h2>Contributing</h2>
+
+<p>Build stuff, run the tests, then submit a pull request with comments and a
+description of what you've done, and why.</p>
+
+<h2>License</h2>
+<p>This code and its accompanying README and are
+<a href="https://www.opensource.org/licenses/mit-license.php">MIT licensed</a>.</p>
+
+
+<h2>In Closing</h2>
+<p>Have fun, and please submit suggestions and improvements! You can leave any
+issues here, or contact me on Twitter (@ajacksified).</p>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2024-11-09 13:51:12 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

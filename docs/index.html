@@ -1,0 +1,606 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>mediator docs</title>
+    <link rel="stylesheet" href="ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>mediator2</h1>
+
+
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Class_Subscriber">Class Subscriber </a></li>
+<li><a href="#Class_Channel">Class Channel </a></li>
+<li><a href="#Class_Mediator">Class Mediator </a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><strong>mediator</strong></li>
+</ul>
+<h2>Topics</h2>
+<ul class="">
+  <li><a href="topics/01-introduction.md.html">01-introduction</a></li>
+  <li><a href="topics/CHANGELOG.md.html">CHANGELOG</a></li>
+  <li><a href="topics/LICENSE.md.html">MIT License</a></li>
+</ul>
+<h2>Examples</h2>
+<ul class="nowrap">
+  <li><a href="examples/placeholder.lua.html">placeholder.lua</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>mediator</code></h1>
+<p>Mediator pattern implementation for Lua.</p>
+<p> mediator2 allows you to subscribe and publish to a central object so
+ you can decouple function calls in your application. It's as simple as:</p>
+
+
+<pre>
+mediator:<span class="function-name">subscribe</span>({<span class="string">"channel"</span>}, <span class="keyword">function</span>)
+</pre>
+
+<p> Supports namespacing, predicates,
+ and more.</p>
+
+
+<h2><a href="#Class_Subscriber">Class Subscriber </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#subscriber:update">subscriber:update (updates)</a></td>
+	<td class="summary">Updates the subscriber with new options.</td>
+	</tr>
+</table>
+<h2><a href="#Class_Channel">Class Channel </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#channel:addChannel">channel:addChannel (namespace)</a></td>
+	<td class="summary">Adds a namespace/sub-channel to the channel.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#channel:addSubscriber">channel:addSubscriber (fn, options)</a></td>
+	<td class="summary">Creates a subscriber and adds it to the channel.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#channel:getChannel">channel:getChannel (namespace)</a></td>
+	<td class="summary">Gets a namespace/sub-channel, or creates it if it doesn't exist.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#channel:getSubscriber">channel:getSubscriber (id)</a></td>
+	<td class="summary">Gets a subscriber by its id.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#channel:hasChannel">channel:hasChannel (namespace)</a></td>
+	<td class="summary">Checks if a namespace/sub-channel exists.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#channel:publish">channel:publish (result, ...)</a></td>
+	<td class="summary">Publishes to the channel.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#channel:removeSubscriber">channel:removeSubscriber (id)</a></td>
+	<td class="summary">Removes a subscriber.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#channel:setPriority">channel:setPriority (id, priority)</a></td>
+	<td class="summary">Sets the priority of a subscriber.</td>
+	</tr>
+</table>
+<h2><a href="#Class_Mediator">Class Mediator </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#mediator:getChannel">mediator:getChannel (channelNamespace)</a></td>
+	<td class="summary">Gets a channel by its namespace, or creates it if it doesn't exist.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#mediator:getSubscriber">mediator:getSubscriber (id, channelNamespace)</a></td>
+	<td class="summary">Gets a channel subscriber by its id.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#mediator:publish">mediator:publish (channelNamespace, ...)</a></td>
+	<td class="summary">Publishes to a channel (and its parents).</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#mediator:removeSubscriber">mediator:removeSubscriber (id, channelNamespace)</a></td>
+	<td class="summary">Removes a subscriber.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#mediator:subscribe">mediator:subscribe (channelNamespace, fn, options)</a></td>
+	<td class="summary">Subscribes to a channel.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header has-description"><a name="Class_Subscriber"></a>Class Subscriber </h2>
+
+          <div class="section-description">
+          Subscriber class.
+ This class is instantiated by the <a href="index.html#mediator:subscribe">mediator:subscribe</a> method.
+          </div>
+    <dl class="function">
+    <dt>
+    <a name = "subscriber:update"></a>
+    <strong>subscriber:update (updates)</strong>
+    </dt>
+    <dd>
+    Updates the subscriber with new options.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">updates</span> A table of updates options for the subscriber, with fields:
+        <ul>
+        <li><span class="parameter">fn</span>
+            <span class="types"><span class="type">function</span></span>
+         The new callback function to be called when the channel is published to.
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">options</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+         The new options for the subscriber, see <a href="index.html#mediator:subscribe">mediator:subscribe</a> for fields.
+         (<em>optional</em>)
+        </li>
+        </li></ul>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        nothing
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header has-description"><a name="Class_Channel"></a>Class Channel </h2>
+
+          <div class="section-description">
+          Channel class.
+ This class is instantiated automatically by accessing channels (passing the namespace-array) to the
+ <a href="index.html#">mediator</a> methods. To create or access one use <a href="index.html#mediator:getChannel">mediator:getChannel</a>.
+          </div>
+    <dl class="function">
+    <dt>
+    <a name = "channel:addChannel"></a>
+    <strong>channel:addChannel (namespace)</strong>
+    </dt>
+    <dd>
+    Adds a namespace/sub-channel to the channel.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">namespace</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         The namespace of the channel to add.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="index.html#Channel">Channel</a></span>
+        the newly created channel
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "channel:addSubscriber"></a>
+    <strong>channel:addSubscriber (fn, options)</strong>
+    </dt>
+    <dd>
+    Creates a subscriber and adds it to the channel.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">fn</span>
+            <span class="types"><span class="type">function</span></span>
+         The callback function to be called when the channel is published to.
+        </li>
+        <li><span class="parameter">options</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+         A table of options for the subscriber. See <a href="index.html#mediator:subscribe">mediator:subscribe</a> for fields.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="index.html#Subscriber">Subscriber</a></span>
+        the newly created subscriber
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "channel:getChannel"></a>
+    <strong>channel:getChannel (namespace)</strong>
+    </dt>
+    <dd>
+    Gets a namespace/sub-channel, or creates it if it doesn't exist.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">namespace</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         The namespace of the channel to get.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="index.html#Channel">Channel</a></span>
+        the existing, or newly created channel
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "channel:getSubscriber"></a>
+    <strong>channel:getSubscriber (id)</strong>
+    </dt>
+    <dd>
+    Gets a subscriber by its id.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">id</span>
+            <span class="types"><span class="type">number</span></span>
+         The id of the subscriber to get.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        table or nil if not found. The table will have field <code>index</code> with the index (or priority)
+ of the subscriber in its channel, and field <code>value</code> with the subscriber object itself.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "channel:hasChannel"></a>
+    <strong>channel:hasChannel (namespace)</strong>
+    </dt>
+    <dd>
+    Checks if a namespace/sub-channel exists.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">namespace</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+         The namespace of the channel to check.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+        <code>true</code> if the channel exists, <code>false</code> otherwise
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "channel:publish"></a>
+    <strong>channel:publish (result, ...)</strong>
+    </dt>
+    <dd>
+    Publishes to the channel.
+ After publishing is complete, the parent channel will be published to as well.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">result</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+         Return values (first only) from the callbacks will be stored in this table
+        </li>
+        <li><span class="parameter">...</span>
+         The arguments to pass to the subscribers.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+        The result table after all subscribers have been called.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "channel:removeSubscriber"></a>
+    <strong>channel:removeSubscriber (id)</strong>
+    </dt>
+    <dd>
+    Removes a subscriber.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">id</span>
+            <span class="types"><span class="type">number</span></span>
+         The id of the subscriber to remove.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="index.html#Subscriber">Subscriber</a></span>
+        the removed subscriber, or nil if not found
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "channel:setPriority"></a>
+    <strong>channel:setPriority (id, priority)</strong>
+    </dt>
+    <dd>
+    Sets the priority of a subscriber.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">id</span>
+            <span class="types"><span class="type">number</span></span>
+         The id of the subscriber to set the priority of.
+        </li>
+        <li><span class="parameter">priority</span>
+            <span class="types"><span class="type">number</span></span>
+         The new priority of the subscriber.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        nothing
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header has-description"><a name="Class_Mediator"></a>Class Mediator </h2>
+
+          <div class="section-description">
+          Mediator class.
+ This class is instantiated by calling on the module table.
+          </div>
+    <dl class="function">
+    <dt>
+    <a name = "mediator:getChannel"></a>
+    <strong>mediator:getChannel (channelNamespace)</strong>
+    </dt>
+    <dd>
+    Gets a channel by its namespace, or creates it if it doesn't exist.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">channelNamespace</span>
+            <span class="types"><span class="type">array</span></span>
+         The namespace-array of the channel to get.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="index.html#Channel">Channel</a></span>
+        the existing, or newly created channel
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "mediator:getSubscriber"></a>
+    <strong>mediator:getSubscriber (id, channelNamespace)</strong>
+    </dt>
+    <dd>
+    Gets a channel subscriber by its id.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">id</span>
+            <span class="types"><span class="type">number</span></span>
+         The id of the subscriber to get.
+        </li>
+        <li><span class="parameter">channelNamespace</span>
+            <span class="types"><span class="type">array</span></span>
+         The namespace-array of the channel to get the subscriber from (created if it doesn't exist).
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        table or nil if not found. The table will have field <code>index</code> with the index (or priority)
+ of the subscriber in its channel, and field <code>value</code> with the subscriber object itself.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "mediator:publish"></a>
+    <strong>mediator:publish (channelNamespace, ...)</strong>
+    </dt>
+    <dd>
+    Publishes to a channel (and its parents).
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">channelNamespace</span>
+            <span class="types"><span class="type">array</span></span>
+         The namespace-array of the channel to publish to (created if it doesn't exist).
+        </li>
+        <li><span class="parameter">...</span>
+         The arguments to pass to the subscribers.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+        The result table after all subscribers have been called.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "mediator:removeSubscriber"></a>
+    <strong>mediator:removeSubscriber (id, channelNamespace)</strong>
+    </dt>
+    <dd>
+    Removes a subscriber.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">id</span>
+            <span class="types"><span class="type">number</span></span>
+         The id of the subscriber to remove.
+        </li>
+        <li><span class="parameter">channelNamespace</span>
+            <span class="types"><span class="type">array</span></span>
+         The namespace-array of the channel to remove the subscriber from (created if it doesn't exist).
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="index.html#Subscriber">Subscriber</a></span>
+        the removed subscriber, or nil if not found
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "mediator:subscribe"></a>
+    <strong>mediator:subscribe (channelNamespace, fn, options)</strong>
+    </dt>
+    <dd>
+    Subscribes to a channel.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">channelNamespace</span>
+            <span class="types"><span class="type">array</span></span>
+         The namespace-array of the channel to subscribe to (created if it doesn't exist).
+        </li>
+        <li><span class="parameter">fn</span>
+            <span class="types"><span class="type">function</span></span>
+         The callback function to be called when the channel is published to.
+ signature: <code>anyResult, boolContinue = fn(...)</code> where <code>anyResult</code> is any value to be stored in the result table,
+ and <code>boolContinue</code> is a boolean indicating whether to continue calling the next subscriber.
+        </li>
+        <li><span class="parameter">options</span> A table of options for the subscriber, with fields:
+        <ul>
+        <li><span class="parameter">predicate</span>
+            <span class="types"><span class="type">function</span></span>
+         A function that returns a boolean. If <code>true</code>, the subscriber will be called.
+ The predicate function will be passed the arguments that were passed to the publish function.
+         (<em>optional</em>)
+        </li>
+        <li><span class="parameter">priority</span>
+            <span class="types"><span class="type">integer</span></span>
+         The priority of the subscriber. The lower the number,
+ the higher the priority. Defaults to after all existing handlers.
+         (<em>optional</em>)
+        </li>
+        </li></ul>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="index.html#Subscriber">Subscriber</a></span>
+        the newly created subscriber
+    </ol>
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2024-11-09 13:51:12 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

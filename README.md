@@ -1,17 +1,12 @@
-mediator\_lua
-===========
+mediator2
+=========
 
-Version 1.1.2
 
 For more information, please see
 
-[View the project on Github](https://github.com/Olivine-Labs/mediator_lua)
+[View the project on Github](https://github.com/Tieske/mediator2)
 
-[View the documentation](https://olivinelabs.com/mediator_lua)
-
-If you have [luarocks](https://luarocks.org), install it with `luarocks install mediator_lua`.
-If you don't, get it. If you really don't want to, just copy mediator.lua from the
-[Git repository](https://github.com/OlivineLabs/mediator_lua).
+If you have [luarocks](https://luarocks.org), install it with `luarocks install mediator2`.
 
 A utility class to help you manage events.
 ------------------------------------------
@@ -41,7 +36,7 @@ Instantiate a new mediator, and then you can being subscribing, removing, and pu
 Example:
 
 ```lua
-Mediator = require "mediator_lua"
+Mediator = require "mediator2"
 mediator = Mediator() -- instantiate a new mediator
 
 mediator:publish(channel, <data, data, ... >)
@@ -88,7 +83,7 @@ Examples:
 
 
 ```lua
-Mediator = require("mediator_lua")
+Mediator = require("mediator2")
 local mediator = Mediator()
 
 -- Print data when the "message" channel is published to

@@ -5,13 +5,9 @@ Version 1.1.2
 
 For more information, please see
 
-[View the project on Github](https://github.com/Olivine-Labs/mediator_lua)
+[View the project on Github](https://github.com/Tieske/mediator2)
 
-[View the documentation](https://olivinelabs.com/mediator_lua)
-
-If you have [luarocks](https://luarocks.org), install it with `luarocks install mediator_lua`.
-If you don't, get it. If you really don't want to, just copy mediator.lua from the
-[Git repository](https://github.com/OlivineLabs/mediator_lua).
+If you have [luarocks](https://luarocks.org), install it with `luarocks install mediator2`.
 
 A utility class to help you manage events.
 ------------------------------------------
@@ -40,37 +36,48 @@ You can register events with the mediator two ways: using channels, or with a
 *predicate* to perform more complex matching (a predicate is a function that
 returns a true/false value that determines if mediator should run the callback.)
 
-Instantiate a new mediator, and then you can being subscribing, removing, and publishing.
+Instantiate a new mediator, and then you can be subscribing, removing, and publishing.
 
 Example:
 
 ```lua
-Mediator = require "mediator_lua"
-mediator = Mediator() -- instantiate a new mediator
+local Mediator = require "mediator2"
+local mediator = Mediator() -- instantiate a new mediator
 
-mediator:publish(channel, <data, data, ... >)
-mediator:remove(<channel>)
+local subscriber = mediator:subscribe(
+  { "chat", "Lua", "mediator" },  -- the namespace
+  function(...) print(...) end,   -- the callback
+)
+
+mediator:publish(
+  { "chat", "Lua", "mediator" },  -- channel to publish to
+  "hello", "from", "Lua"          -- data to publish
+)
+
+-->> prints "hello from lua"
+
+mediator:removeSubscriber(subscriber.id, { "chat", "Lua", "mediator" } )
 ```
 
-Subscription signature:
+Subscription callback signature:
 
 ```lua
-(channel, callback, <options>, <context>);
+local result, continue = function(...)
 ```
+Where:
 
-Callback signature:
+- `result` is a result passed back to the publisher (any type)
+- `continue` determines whether any additional callbacks will be called
 
-```lua
-function(<data, data ...>, channel);
-```
+Callback execution order (if `continue` remains truthy over the chain) is to
+first call the handlers for the channel, and then traverse up to the parent channel
+and call its handlers, all the way up.
 
-Mediator:subscribe `options` (all are optional; default is empty):
-
-
+The options accepted by a subscription:
 ```lua
 {
   predicate = function(arg1, arg2) return arg1 == arg2 end
-  priority = 0|1|... (array index; max of callback array length, min of 0)
+  priority = 1|2|... (array index; max of callback array length, min of 1)
 }
 ```
 
@@ -92,7 +99,7 @@ Examples:
 
 
 ```lua
-Mediator = require("mediator_lua")
+Mediator = require("mediator2")
 local mediator = Mediator()
 
 -- Print data when the "message" channel is published to
