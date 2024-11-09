@@ -5,7 +5,7 @@ describe("mediator", function()
   before_each(function()
     Mediator = require("mediator2")
     m = Mediator()
-    c = Mediator.Channel("test")
+    c = m:getChannel({"test"}) -- creates the channel, by looking it up
     testfn = function() end
     testfn2 = function() end
     testfn3 = function() end

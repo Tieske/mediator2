@@ -188,12 +188,7 @@ end
 -- This class is instantiated by calling on the module table.
 -- @type Mediator
 
-local Mediator = setmetatable(
-{
-  Channel = Channel, -- TODO: cannot be used by user, so do not export it. Or only for testing purposes.
-  Subscriber = Subscriber -- TODO: cannot be used by user, so do not export it. Or only for testing purposes.
-},
-{
+local Mediator = setmetatable({},{
   __call = function (fn, options)
     return {
       channel = Channel('root'),
