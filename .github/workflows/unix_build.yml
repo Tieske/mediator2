@@ -40,7 +40,7 @@ jobs:
       run: |
         luarocks install busted
         luarocks install luacov-coveralls
-        luarocks remove --force mediator2
+      #  luarocks remove --force mediator2
 
     - name: build
       run: |
