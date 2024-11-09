@@ -117,6 +117,16 @@ describe("mediator", function()
     assert.is.equal(c:getSubscriber(sub2.id), nil)
   end)
 
+  it("can remove subscribers by calling subsriber:remove()", function()
+    c:addSubscriber(testfn)
+    local sub2 = c:addSubscriber(testfn2)
+    assert.is.not_nil(c:getSubscriber(sub2.id))
+
+    sub2:remove()
+
+    assert.is_nil(c:getSubscriber(sub2.id))
+  end)
+
   it("can return a subscriber registered to a subchannel", function()
     c:addChannel("level2")
 

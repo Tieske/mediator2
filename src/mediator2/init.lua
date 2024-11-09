@@ -43,6 +43,12 @@ local function Subscriber(fn, options, channel)
           self.options.priority = nil
         end
       end
+    end,
+
+    --- Removes the subscriber.
+    -- @return nothing
+    remove = function(self)
+      self.channel:removeSubscriber(self.id)
     end
   }
   sub.id = getUniqueId(sub)
@@ -166,7 +172,7 @@ local function Channel(namespace, parent)
         -- if it doesn't have a predicate, or it does and it's true then run it
         if not callback.options.predicate or callback.options.predicate(...) then
            -- just take the first result and insert it into the result table
-          local value, continue = callback.fn(...)
+          local value, continue = callback.fn(...) -- TODO: continue seems easy to break, should it be "stop" instead?
 
           if value then table.insert(result, value) end
           if not continue then return result end
@@ -252,4 +258,7 @@ local Mediator = setmetatable({},{
     }
   end
 })
+
+
+
 return Mediator
