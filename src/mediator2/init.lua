@@ -228,7 +228,7 @@ function Channel:_setPriority(subscriber, priority)
 end
 
 
---- Adds a namespace/sub-channel to the channel.
+--- Adds a single namespace/sub-channel to the current channel.
 -- If the channel already exists, the existing one will be returned.
 -- @tparam string namespace The namespace of the channel to add.
 -- @treturn Channel the newly created channel
@@ -239,7 +239,7 @@ end
 
 
 
---- Checks if a namespace/sub-channel exists.
+--- Checks if a single namespace/sub-channel exists within the current channel.
 -- @tparam string namespace The namespace of the channel to check.
 -- @treturn boolean `true` if the channel exists, `false` otherwise
 function Channel:hasChannel(namespace)
@@ -248,7 +248,7 @@ end
 
 
 
---- Gets a namespace/sub-channel, or creates it if it doesn't exist.
+--- Gets a single namespace/sub-channel from the current channel, or creates it if it doesn't exist.
 -- @tparam string namespace The namespace of the channel to get.
 -- @treturn Channel the existing, or newly created channel
 function Channel:getChannel(namespace)
@@ -348,13 +348,16 @@ function Mediator:__index(key)
 end
 
 
---- Gets a channel by its namespace, or creates it if it doesn't exist.
--- @tparam array channelNamespace The namespace-array of the channel to get.
+--- Gets a channel by its namespaces, or creates them if they don't exist.
+-- @tparam array channelNamespaces The namespace-array of the channel to get.
 -- @treturn Channel the existing, or newly created channel
-function Mediator:getChannel(channelNamespace)
+-- @usage
+-- local m = require("mediator")()
+-- local channel = m:getChannel({"car", "engine", "rpm"})
+function Mediator:getChannel(channelNamespaces)
   local channel = self.channel
 
-  for _, namespace in ipairs(channelNamespace) do
+  for _, namespace in ipairs(channelNamespaces) do
     channel = channel:getChannel(namespace)
   end
 
@@ -364,7 +367,7 @@ end
 
 
 --- Subscribes to a channel.
--- @tparam array channelNamespace The namespace-array of the channel to subscribe to (created if it doesn't exist).
+-- @tparam array channelNamespaces The namespace-array of the channel to subscribe to (created if it doesn't exist).
 -- @tparam function fn The callback function to be called when the channel is published to.
 -- signature: `continueSignal, result = fn([ctx,] ...)` where `result` is any value to be stored in the result
 -- table and passed back to the publisher. `continueSignal` is a signal to the mediator to stop or continue
@@ -376,19 +379,27 @@ end
 -- @tparam[opt] integer options.priority The priority of the subscriber. The lower the number,
 -- the higher the priority. Defaults to after all existing handlers.
 -- @treturn Subscriber the newly created subscriber
-function Mediator:subscribe(channelNamespace, fn, options)
-  return self:getChannel(channelNamespace):addSubscriber(fn, options)
+function Mediator:subscribe(channelNamespaces, fn, options)
+  return self:getChannel(channelNamespaces):addSubscriber(fn, options)
 end
 
 
 
 --- Publishes to a channel (and its parents).
--- @tparam array channelNamespace The namespace-array of the channel to publish to (created if it doesn't exist).
+-- @tparam array channelNamespaces The namespace-array of the channel to publish to (created if it doesn't exist).
 -- @param ... The arguments to pass to the subscribers.
 -- @treturn table The result table after all subscribers have been called.
-function Mediator:publish(channelNamespace, ...)
-  return self:getChannel(channelNamespace):publish(...)
+-- @usage
+-- local m = require("mediator")()
+-- m:publish({"car", "engine", "rpm"}, 1000, "rpm")
+--
+-- -- a more efficient way would be to keep the channel and directly publish to it:
+-- local channel = m:getChannel({"car", "engine", "rpm"})
+-- channel:publish(1000, "rpm")
+function Mediator:publish(channelNamespaces, ...)
+  return self:getChannel(channelNamespaces):publish(...)
 end
+
 
 
 --- Stops the mediator from calling the next subscriber.
@@ -399,6 +410,9 @@ end
 --   return mediator.STOP, result_data
 -- end)
 Mediator.STOP = STOP
+
+
+
 --- Lets the mediator continue calling the next subscriber.
 -- This is the default value if nothing is returned from a subscriber callback.
 -- @field CONTINUE
@@ -408,5 +422,7 @@ Mediator.STOP = STOP
 --   return mediator.CONTINUE, result_data
 -- end)
 Mediator.CONTINUE = CONTINUE
+
+
 
 return Mediator
