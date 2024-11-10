@@ -1,6 +1,6 @@
 # MIT License
 
-### Copyright © 2012-2020 Olivine Labs
+### Copyright © 2012-2020 Olivine Labs, 2024 Thijs Schreijer
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
