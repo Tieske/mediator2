@@ -37,6 +37,14 @@
 -- The predicate function will be passed the ctx (if present) + the arguments that were
 -- passed to the publish function.
 --
+-- *Callback results*
+--
+-- Subscriber callback funcions can return 2 values:
+--
+-- 1. A signal to the mediator to stop or continue calling the next subscriber.
+-- Should be `mediator.CONTINUE` (default) or `mediator.STOP`.
+-- 2. Any value to be stored in the result table and passed back to the publisher.
+--
 -- @module mediator
 
 

@@ -17,7 +17,7 @@ description = {
   detailed = [[
     mediator2 allows you to subscribe and publish to a central object so
     you can decouple function calls in your application. It's as simple as
-    mediatoraddSsubscriber({"channel"}, function). Supports namespacing, predicates,
+    mediator:addSsubscriber({"channel"}, function). Supports namespacing, predicates,
     and more.
   ]],
   homepage = "https://github.com/"..github_account_name.."/"..github_repo_name,
