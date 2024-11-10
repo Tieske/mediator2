@@ -2,7 +2,7 @@
 -- mediator2 allows you to subscribe and publish to a central object so
 -- you can decouple function calls in your application. It's as simple as:
 --
---     mediator:subscribe({"channel"}, function)
+--     mediator:addSubscriber({"channel"}, function)
 --
 -- Supports namespacing, predicates,
 -- and more.
@@ -52,10 +52,10 @@ local CONTINUE = {}
 -- @type Subscriber
 -- @usage
 -- local m = require("mediator")()
--- local sub1 = m:subscribe({"car", "engine", "rpm"}, function(value, unit)
+-- local sub1 = m:addSubscriber({"car", "engine", "rpm"}, function(value, unit)
 --     print("Sub1 ", value, unit)
 --   end)
--- local sub2 = m:subscribe({"car", "engine", "rpm"}, function(value, unit)
+-- local sub2 = m:addSubscriber({"car", "engine", "rpm"}, function(value, unit)
 --     print("Sub2 ", value, unit)
 --   end)
 --
@@ -82,7 +82,7 @@ local CONTINUE = {}
 --   predicate = nil,
 --   priority = 1,              -- make this one the top-priority
 -- }
--- local sub3 = m:subscribe({"car", "engine", "rpm"}, function(ctx, value, unit)
+-- local sub3 = m:addSubscriber({"car", "engine", "rpm"}, function(ctx, value, unit)
 --     ctx.count = ctx.count + 1
 --     print("Sub3 ", ctx.count, value, unit)
 --     return m.STOP, count     -- stop the mediator from calling the next subscriber
@@ -379,7 +379,7 @@ end
 -- @tparam[opt] integer options.priority The priority of the subscriber. The lower the number,
 -- the higher the priority. Defaults to after all existing handlers.
 -- @treturn Subscriber the newly created subscriber
-function Mediator:subscribe(channelNamespaces, fn, options)
+function Mediator:addSubscriber(channelNamespaces, fn, options)
   return self:getChannel(channelNamespaces):addSubscriber(fn, options)
 end
 
@@ -405,7 +405,7 @@ end
 --- Stops the mediator from calling the next subscriber.
 -- @field STOP
 -- @usage
--- local sub = mediator:subscribe({"channel"}, function()
+-- local sub = mediator:addSubscriber({"channel"}, function()
 --   result_data = {}
 --   return mediator.STOP, result_data
 -- end)
@@ -417,7 +417,7 @@ Mediator.STOP = STOP
 -- This is the default value if nothing is returned from a subscriber callback.
 -- @field CONTINUE
 -- @usage
--- local sub = mediator:subscribe({"channel"}, function()
+-- local sub = mediator:addSubscriber({"channel"}, function()
 --   result_data = {}
 --   return mediator.CONTINUE, result_data
 -- end)

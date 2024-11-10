@@ -48,4 +48,6 @@ The scope of what is covered by the version number excludes:
   instead of stopping. 2 signals, `mediator.STOP` and `mediator.CONTINUE` can be returned.
 - BREAKING feat: add a context (ctx) to a subscriber that is passed as the first
   argument on each publish call, which also enables object-based handlers.
+- BREAKING: renamed `mediator:subscribe` to `mediator:addSubscriber` for consistency.
 - fix: addChannel no longer overwrites the existing one if it exists
+

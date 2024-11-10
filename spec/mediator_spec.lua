@@ -211,7 +211,7 @@ describe("mediator", function()
     local received
     local assertFn = function(data) received = data end
 
-    m:subscribe({"test"}, assertFn)
+    m:addSubscriber({"test"}, assertFn)
     m:publish({"test"}, "hi")
     assert.are.equal(received, "hi")
   end)
@@ -220,8 +220,8 @@ describe("mediator", function()
     local a = spy.new(function() end)
     local b = spy.new(function() end)
 
-    m:subscribe({ "request", "a" }, a)
-    m:subscribe({ "request", "b" }, b)
+    m:addSubscriber({ "request", "a" }, a)
+    m:addSubscriber({ "request", "b" }, b)
 
     m:publish({ "request", "a" })
     m:publish({ "request", "b" })
@@ -237,7 +237,7 @@ describe("mediator", function()
       olddata = data
     end
 
-    m:subscribe({"test"}, assertFn)
+    m:addSubscriber({"test"}, assertFn)
     m:publish({ "test" }, "hi")
 
     assert.are.equal(olddata, "hi")
@@ -259,8 +259,8 @@ describe("mediator", function()
 
     c:addChannel("level2")
 
-    m:subscribe({ "test", "level2" }, assertFn)
-    m:subscribe({ "test" }, assertFn2)
+    m:addSubscriber({ "test", "level2" }, assertFn)
+    m:addSubscriber({ "test" }, assertFn2)
 
     m:publish({ "test", "level2" }, "didn't read lol")
 
@@ -286,8 +286,8 @@ describe("mediator", function()
 
     c:addChannel("level2")
 
-    m:subscribe({"test","level2"}, assertFn)
-    m:subscribe({"test"}, assertFn2, { predicate = predicate })
+    m:addSubscriber({"test","level2"}, assertFn)
+    m:addSubscriber({"test"}, assertFn2, { predicate = predicate })
 
     m:publish({"test", "level2"}, "didn't read lol")
 
