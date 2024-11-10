@@ -6,6 +6,37 @@
 --
 -- Supports namespacing, predicates,
 -- and more.
+--
+-- __Some basics__:
+--
+-- *Priorities*
+--
+-- Subscribers can have priorities. The lower the number, the higher the priority.
+-- The default priority is after all existing handlers.
+-- The priorities are implemented as array-indices, so they are 1-based (highest).
+-- This also means that changing priority of a subscriber might impact the absolute value
+-- of the priority of other subscribers.
+--
+-- *Channels*
+--
+-- Channels have a tree structure, where each channel can have multiple sub-channels.
+-- When publishing to a channel, the parent channel will be published to as well.
+-- Channels are automatically created when subscribing or publishing to them.
+--
+-- *Context*
+--
+-- Subscribers can have a context. The context is a value that will be passed to the subscriber
+-- on each call. The context will be omitted from the callback if not provided (`nil`). It can be
+-- any valid Lua value, and usually is a table.
+-- The context doubles as a `self` parameter for object-based handlers.
+--
+-- *Predicates*
+--
+-- Subscribers can have predicates. A predicate is a function that returns a boolean.
+-- If the predicate returns `true`, the subscriber will be called.
+-- The predicate function will be passed the ctx (if present) + the arguments that were
+-- passed to the publish function.
+--
 -- @module mediator
 
 
@@ -17,7 +48,7 @@ local CONTINUE = {}
 
 
 --- Subscriber class.
--- This class is instantiated by the `mediator:subscribe` method.
+-- This class is instantiated by the `mediator:subscribe` and `Channel:addSubscriber` methods.
 -- @type Subscriber
 -- @usage
 -- local m = require("mediator")()
@@ -26,7 +57,7 @@ local CONTINUE = {}
 --   end)
 -- local sub2 = m:subscribe({"car", "engine", "rpm"}, function(value, unit)
 --     print("Sub2 ", value, unit)
--- end)
+--   end)
 --
 -- m:publish({"car", "engine", "rpm"}, 1000, "rpm")
 -- -- Output:
@@ -45,7 +76,23 @@ local CONTINUE = {}
 -- m:publish({"car", "engine", "rpm"}, 3000, "rpm")
 -- -- Output:
 -- -- Sub2 3000 rpm
-
+--
+-- local options = {
+--   ctx = { count = 0 },       -- if provided, will be passed on each call
+--   predicate = nil,
+--   priority = 1,              -- make this one the top-priority
+-- }
+-- local sub3 = m:subscribe({"car", "engine", "rpm"}, function(ctx, value, unit)
+--     ctx.count = ctx.count + 1
+--     print("Sub3 ", ctx.count, value, unit)
+--     return m.STOP, count     -- stop the mediator from calling the next subscriber
+--   end)
+--
+-- local results = m:publish({"car", "engine", "rpm"}, 1000, "rpm")
+-- -- Output:
+-- -- Sub3 1 1000 rpm
+--
+-- print(results[1]) -- 1      -- the result, count, returned from subscriber sub3
 
 local Subscriber = setmetatable({},{
 
@@ -182,10 +229,11 @@ end
 
 
 --- Adds a namespace/sub-channel to the channel.
+-- If the channel already exists, the existing one will be returned.
 -- @tparam string namespace The namespace of the channel to add.
 -- @treturn Channel the newly created channel
 function Channel:addChannel(namespace)
-  self.channels[namespace] = Channel(namespace, self)
+  self.channels[namespace] = self.channels[namespace] or Channel(namespace, self)
   return self.channels[namespace]
 end
 

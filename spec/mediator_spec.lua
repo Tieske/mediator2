@@ -89,6 +89,12 @@ describe("mediator", function()
     assert.are_not.equal(c.channels["level2"], nil)
   end)
 
+  it("returns existing subchannel if it exists", function()
+    local c1 = c:addChannel("level2")
+    local c2 = c:addChannel("level2")
+    assert.are.equal(c1, c2)
+  end)
+
   it("can check if a subchannel has been added", function()
     c:addChannel("level2")
     assert.is.truthy(c:hasChannel("level2"), true)

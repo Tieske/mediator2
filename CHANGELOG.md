@@ -36,16 +36,16 @@ The scope of what is covered by the version number excludes:
 - fix: ci moved to Github Actions
 - fix: linter errors
 - fix: priority cannot be 0, since Lua arrays start at 1
-- fix: set channel property on subscriber, drop 'stopped' as it was unused
+- fix: set 'channel' property on subscriber, drop 'stopped' as it was unused
 - fix: use proper 'self' instead of upvalue in channel
 - feat: add `ldoc` based documentation
 - feat: allow Subscriber to update its priority
-- BREAKING: remove the exported Channel and Subscriber functions. In theory breaking but
-  for most users it shouldn't matter.
+- BREAKING: remove the exported Channel and Subscriber functions.
 - feat: add "remove" method to Subscriber to unsubscribe
 - BREAKING: remove the subscriber `id`, instead use subscriber object itself. Several
   methods changed signature or were removed.
 - BREAKING: changed the result of the callbacks, default is now to continue processing
   instead of stopping. 2 signals, `mediator.STOP` and `mediator.CONTINUE` can be returned.
 - BREAKING feat: add a context (ctx) to a subscriber that is passed as the first
-  argument on each publich call, which also enables object-based handlers.
+  argument on each publish call, which also enables object-based handlers.
+- fix: addChannel no longer overwrites the existing one if it exists
