@@ -8,11 +8,45 @@
 -- and more.
 -- @module mediator
 
+local STOP = {}
+local CONTINUE = {}
+local signals = {
+  STOP = true,
+  CONTINUE = false,
+}
 
 
 --- Subscriber class.
 -- This class is instantiated by the `mediator:subscribe` method.
 -- @type Subscriber
+-- @usage
+-- local m = require("mediator")()
+-- local sub1 = m:subscribe({"car", "engine", "rpm"}, function(value, unit)
+--     print("Sub1 ", value, unit)
+--   end)
+-- local sub2 = m:subscribe({"car", "engine", "rpm"}, function(value, unit)
+--     print("Sub2 ", value, unit)
+-- end)
+--
+-- m:publish({"car", "engine", "rpm"}, 1000, "rpm")
+-- -- Output:
+-- -- Sub1 1000 rpm
+-- -- Sub2 1000 rpm
+--
+-- sub2:setPriority(1)
+--
+-- m:publish({"car", "engine", "rpm"}, 2000, "rpm")
+-- -- Output:
+-- -- Sub2 2000 rpm
+-- -- Sub1 2000 rpm
+--
+-- sub1:remove()
+--
+-- m:publish({"car", "engine", "rpm"}, 3000, "rpm")
+-- -- Output:
+-- -- Sub2 3000 rpm
+
+
 local Subscriber = setmetatable({},{
 
   -- Instantiates a new Subscriber object.
@@ -197,16 +231,20 @@ end
 -- @param ... The arguments to pass to the subscribers.
 -- @treturn table The result table after all subscribers have been called.
 function Channel:_publish(result, ...)
-  for i = 1, #self.subscribers do
-    local callback = self.subscribers[i]
-
+  for i, subscriber in ipairs(self.subscribers) do
     -- if it doesn't have a predicate, or it does and it's true then run it
-    if not callback.options.predicate or callback.options.predicate(...) then
-        -- just take the first result and insert it into the result table
-      local value, continue = callback.fn(...) -- TODO: continue seems easy to break, should it be "stop" instead?
-
-      if value then table.insert(result, value) end
-      if not continue then return result end
+    if not subscriber.options.predicate or subscriber.options.predicate(...) then
+      local continue
+      continue, result[#result+1] = subscriber.fn(...)
+      if continue ~= nil then
+        if continue == STOP then
+          return result
+        elseif continue ~= CONTINUE then
+          local info = debug.getinfo(subscriber.fn)
+          local err = ("Invalid return value from subscriber%s:%s, expected mediator.STOP or mediator.CONTINUE"):format(info.source, info.linedefined)
+          error(err)
+        end
+      end
     end
   end
 
@@ -266,8 +304,9 @@ end
 --- Subscribes to a channel.
 -- @tparam array channelNamespace The namespace-array of the channel to subscribe to (created if it doesn't exist).
 -- @tparam function fn The callback function to be called when the channel is published to.
--- signature: `anyResult, boolContinue = fn(...)` where `anyResult` is any value to be stored in the result table,
--- and `boolContinue` is a boolean indicating whether to continue calling the next subscriber.
+-- signature: `continueSignal, result = fn(...)` where `result` is any value to be stored in the result
+-- table and passed back to the publisher. `continueSignal` is a signal to the mediator to stop or continue
+-- calling the next subscriber, should be `mediator.STOP` or `mediator.CONTINUE` (default).
 -- @tparam table options A table of options for the subscriber, with fields:
 -- @tparam[opt] function options.predicate A function that returns a boolean. If `true`, the subscriber will be called.
 -- The predicate function will be passed the arguments that were passed to the publish function.
@@ -289,5 +328,8 @@ function Mediator:publish(channelNamespace, ...)
 end
 
 
+
+Mediator.STOP = STOP
+Mediator.CONTINUE = CONTINUE
 
 return Mediator

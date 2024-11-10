@@ -45,3 +45,5 @@ The scope of what is covered by the version number excludes:
 - feat: add "remove" method to Subscriber to unsubscribe
 - BREAKING: remove the subscriber `id`, instead use subscriber object itself. Several
   methods changed signature or were removed.
+- BREAKING: changed the result of the callbacks, default is now to continue processing
+  instead of stopping. 2 signals, `mediator.STOP` and `mediator.CONTINUE` can be returned.

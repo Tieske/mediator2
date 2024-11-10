@@ -154,6 +154,7 @@ describe("mediator", function()
 
     local assertFn = function(data)
       olddata = data
+      return m.STOP
     end
 
     local assertFn2 = function(data)
@@ -166,6 +167,16 @@ describe("mediator", function()
     c:publish(data)
 
     assert.are.equal(olddata.test, 1)
+  end)
+
+  it("fails if propagation is neither STOP nor CONTINUE", function()
+    local function assertFn(data)
+      return "wat"
+    end
+
+    c:addSubscriber(assertFn)
+
+    assert.is.error(function() c:publish({}) end)
   end)
 
   it("publishes to parent channels", function()
