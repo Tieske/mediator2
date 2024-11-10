@@ -1,5 +1,5 @@
 modules = {
-   ["mediator"] = "src/mediator.lua"
+   ["mediator2.init"] = "src/mediator2/init.lua"
 }
 
 runreport = true
