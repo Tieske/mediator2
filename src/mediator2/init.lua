@@ -8,12 +8,12 @@
 -- and more.
 -- @module mediator
 
+
+
+-- signals to be returned by the subscriber to tell the mediator to stop or continue
 local STOP = {}
 local CONTINUE = {}
-local signals = {
-  STOP = true,
-  CONTINUE = false,
-}
+
 
 
 --- Subscriber class.
@@ -232,10 +232,24 @@ end
 -- @treturn table The result table after all subscribers have been called.
 function Channel:_publish(result, ...)
   for i, subscriber in ipairs(self.subscribers) do
-    -- if it doesn't have a predicate, or it does and it's true then run it
-    if not subscriber.options.predicate or subscriber.options.predicate(...) then
+    local ctx = subscriber.options.ctx
+    local predicate = subscriber.options.predicate
+    local shouldRun = true
+    if predicate then
+      if ctx ~= nil then
+        shouldRun = predicate(ctx, ...)
+      else
+        shouldRun = predicate(...)
+      end
+    end
+
+    if shouldRun then
       local continue
-      continue, result[#result+1] = subscriber.fn(...)
+      if ctx ~= nil then
+        continue, result[#result+1] = subscriber.fn(ctx, ...)
+      else
+        continue, result[#result+1] = subscriber.fn(...)
+      end
       if continue ~= nil then
         if continue == STOP then
           return result
@@ -304,12 +318,13 @@ end
 --- Subscribes to a channel.
 -- @tparam array channelNamespace The namespace-array of the channel to subscribe to (created if it doesn't exist).
 -- @tparam function fn The callback function to be called when the channel is published to.
--- signature: `continueSignal, result = fn(...)` where `result` is any value to be stored in the result
+-- signature: `continueSignal, result = fn([ctx,] ...)` where `result` is any value to be stored in the result
 -- table and passed back to the publisher. `continueSignal` is a signal to the mediator to stop or continue
 -- calling the next subscriber, should be `mediator.STOP` or `mediator.CONTINUE` (default).
 -- @tparam table options A table of options for the subscriber, with fields:
+-- @tparam[opt] function options.ctx The context to call the subscriber with, will be omitted from the callback if `nil`.
 -- @tparam[opt] function options.predicate A function that returns a boolean. If `true`, the subscriber will be called.
--- The predicate function will be passed the arguments that were passed to the publish function.
+-- The predicate function will be passed the ctx + the arguments that were passed to the publish function.
 -- @tparam[opt] integer options.priority The priority of the subscriber. The lower the number,
 -- the higher the priority. Defaults to after all existing handlers.
 -- @treturn Subscriber the newly created subscriber
@@ -328,8 +343,22 @@ function Mediator:publish(channelNamespace, ...)
 end
 
 
-
+--- Stops the mediator from calling the next subscriber.
+-- @field STOP
+-- @usage
+-- local sub = mediator:subscribe({"channel"}, function()
+--   result_data = {}
+--   return mediator.STOP, result_data
+-- end)
 Mediator.STOP = STOP
+--- Lets the mediator continue calling the next subscriber.
+-- This is the default value if nothing is returned from a subscriber callback.
+-- @field CONTINUE
+-- @usage
+-- local sub = mediator:subscribe({"channel"}, function()
+--   result_data = {}
+--   return mediator.CONTINUE, result_data
+-- end)
 Mediator.CONTINUE = CONTINUE
 
 return Mediator

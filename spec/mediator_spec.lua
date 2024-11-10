@@ -205,7 +205,7 @@ describe("mediator", function()
     local received
     local assertFn = function(data) received = data end
 
-    local s = m:subscribe({"test"}, assertFn)
+    m:subscribe({"test"}, assertFn)
     m:publish({"test"}, "hi")
     assert.are.equal(received, "hi")
   end)
@@ -289,4 +289,42 @@ describe("mediator", function()
     assert.are_not.equal(olddata2, "didn't read lol")
   end)
 
+  it("passes the ctx to the subscriber callback", function()
+    local ctx = nil
+    local assertFn = function(c, data)
+      ctx = c
+    end
+
+    c:addSubscriber(assertFn, { ctx = "wat" })
+    c:publish({})
+
+    assert.are.equal("wat", ctx)
+  end)
+
+  it("passes 'false' as a valid ctx to the subscriber callback", function()
+    local ctx = nil
+    local assertFn = function(c, data)
+      ctx = c
+      assert.are.equal("wat", data)
+    end
+
+    c:addSubscriber(assertFn, { ctx = false })
+    c:publish("wat")
+
+    assert.are.equal(false, ctx)
+  end)
+
+  it("can pass self as context for object-based handlers", function()
+    local myObject = {
+      last_noise = nil,
+    }
+    function myObject:makeNoise(noise)
+      self.last_noise = noise
+    end
+
+    c:addSubscriber(myObject.makeNoise, { ctx = myObject })
+    c:publish("meow")
+
+    assert.are.equal("meow", myObject.last_noise)
+  end)
 end)

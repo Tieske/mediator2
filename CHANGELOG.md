@@ -47,3 +47,5 @@ The scope of what is covered by the version number excludes:
   methods changed signature or were removed.
 - BREAKING: changed the result of the callbacks, default is now to continue processing
   instead of stopping. 2 signals, `mediator.STOP` and `mediator.CONTINUE` can be returned.
+- BREAKING feat: add a context (ctx) to a subscriber that is passed as the first
+  argument on each publich call, which also enables object-based handlers.
