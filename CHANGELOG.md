@@ -51,3 +51,5 @@ The scope of what is covered by the version number excludes:
 - BREAKING: renamed `mediator:subscribe` to `mediator:addSubscriber` for consistency.
 - fix: addChannel no longer overwrites the existing one if it exists
 - feat: added an option for a subscriber to specify to NOT receive child messages
+- feat: added `Channel:getNamespaces` to retrieve namespace array of channel
+- feat: added `WILDCARD`, to match any namespace when subscribing
