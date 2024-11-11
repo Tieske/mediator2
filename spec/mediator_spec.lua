@@ -19,6 +19,11 @@ describe("mediator", function()
     testfn3 = nil
   end)
 
+  it("can return its own namespaces list", function()
+    local c2 = m:getChannel({"test", "level2"})
+    assert.are.same({ "test", "level2" }, c2:getNamespaces())
+  end)
+
   it("can register subscribers", function()
     c:addSubscriber(testfn)
 
@@ -358,4 +363,43 @@ describe("mediator", function()
 
     assert.are.equal("meow", myObject.last_noise)
   end)
+
+  it("can subscribe to a wildcard channel", function()
+    local results = {}
+
+    local sub1key = "main/+/lights"
+    m:addSubscriber({ "main", m.WILDCARD, "lights" }, function(...)
+      results[sub1key] = results[sub1key] or {}
+      table.insert(results[sub1key], {...})
+    end, { skipChildren = true })   -- skip the children on this one
+
+    local sub2key = "main/car/+"
+    m:addSubscriber({ "main", "car", m.WILDCARD }, function(...)
+      results[sub2key] = results[sub2key] or {}
+      table.insert(results[sub2key], {...})
+    end, { skipChildren = false })  -- don't skip the children on this one
+
+    m:publish({ "main", "motorcycle", "engine", "rpm"  }, 6000, "rpm")
+    m:publish({ "main", "motorcycle", "engine", "fuel" }, 90, "%")
+    m:publish({ "main", "motorcycle", "engine"         }, "start")
+    m:publish({ "main", "motorcycle", "lights"         }, "on")
+    m:publish({ "main", "car",        "engine", "rpm"  }, 1500, "rpm")
+    m:publish({ "main", "car",        "engine", "fuel" }, 30, "%")
+    m:publish({ "main", "car",        "engine"         }, "stop")
+    m:publish({ "main", "car",        "lights"         }, "off")
+
+    assert.are.same({
+      ["main/+/lights"] = {
+        { "on" },  -- motorcycle/lights
+        { "off" }, -- car/lights
+      },
+      ["main/car/+"] = {
+        { 1500, "rpm" }, -- car/engine/rpm
+        { 30, "%" },     -- car/engine/fuel
+        { "stop" },      -- car/engine
+        { "off" },       -- car/lights
+      },
+    }, results)
+  end)
+
 end)

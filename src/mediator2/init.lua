@@ -52,6 +52,7 @@
 -- signals to be returned by the subscriber to tell the mediator to stop or continue
 local STOP = {}
 local CONTINUE = {}
+local WILDCARD = {}
 
 
 
@@ -172,14 +173,28 @@ local Channel = setmetatable({}, {
   -- Instantiates a new Channel object.
   -- @tparam string namespace The namespace of the channel.
   -- @tparam Channel parent The parent channel.
+  -- @tparam Mediator mediator The mediator object the channel belongs to.
   -- @treturn Channel the newly created channel
-  __call = function(self, namespace, parent)
+  __call = function(self, namespace, parent, mediator)
+    assert(mediator or parent, "Mediator or parent channel required")
     local chan = {
       namespace = namespace,
+      fullNamespace = { namespace }, -- the full list of namespaces, including parents
       subscribers = {},
       channels = {},
       parent = parent,
+      mediator = mediator or parent.mediator,
     }
+
+    -- copy the full namespace list from the parent-tree
+    local p = parent
+    while p do
+      if p.parent ~= nil then
+        table.insert(chan.fullNamespace, 1, p.namespace)
+      end
+      p = p.parent
+    end
+
     return setmetatable(chan, self)
   end
 })
@@ -265,6 +280,14 @@ end
 
 
 
+--- Gets the full namespace array for the current channel.
+-- @treturn Array the full namespace array
+function Channel:getNamespaces()
+  return self.fullNamespace
+end
+
+
+
 -- Removes a subscriber.
 -- @tparam number id The id of the subscriber to remove.
 -- @treturn Subscriber the removed subscriber
@@ -281,12 +304,12 @@ end
 
 
 
--- Publishes to the channel.
--- After publishing is complete, the parent channel will be published to as well.
+-- Publishes to this channel.
 -- @tparam table result Return values (first only) from the callbacks will be stored in this table
 -- @tparam boolean isChildEvent Is this a child event for this channel?
 -- @param ... The arguments to pass to the subscribers.
 -- @treturn table The result table after all subscribers have been called.
+-- @treturn signal Either `mediator.STOP`, or `mediator.CONTINUE`
 function Channel:_publish(result, isChildEvent, ...)
   for i, subscriber in ipairs(self.subscribers) do
     local ctx = subscriber.options.ctx
@@ -315,7 +338,7 @@ function Channel:_publish(result, isChildEvent, ...)
       end
       if continue ~= nil then
         if continue == STOP then
-          return result
+          return result, STOP
         elseif continue ~= CONTINUE then
           local info = debug.getinfo(subscriber.fn)
           local err = ("Invalid return value from subscriber%s:%s, expected mediator.STOP or mediator.CONTINUE"):format(info.source, info.linedefined)
@@ -325,21 +348,16 @@ function Channel:_publish(result, isChildEvent, ...)
     end
   end
 
-  if self.parent then
-    return self.parent:_publish(result, true, ...)
-  else
-    return result
-  end
+  return result, CONTINUE
 end
 
 
 
---- Publishes to the channel.
--- After publishing is complete, the parent channel will be published to as well.
+-- Publishes to this channel.
 -- @param ... The arguments to pass to the subscribers.
 -- @treturn table The result table after all subscribers have been called.
 function Channel:publish(...)
-  return self:_publish({}, false, ...)
+  return self.mediator:publish(self.fullNamespace, ...)
 end
 
 
@@ -350,9 +368,8 @@ end
 
 local Mediator = setmetatable({},{
   __call = function(self)
-    local med = {
-      channel = Channel('root'),
-    }
+    local med = {}
+    med.channel = Channel('root', nil, med)
     return setmetatable(med, self)
   end
 })
@@ -402,21 +419,46 @@ end
 
 
 
---- Publishes to a channel (and its parents).
--- @tparam array channelNamespaces The namespace-array of the channel to publish to (created if it doesn't exist).
--- @param ... The arguments to pass to the subscribers.
--- @treturn table The result table after all subscribers have been called.
--- @usage
--- local m = require("mediator")()
--- m:publish({"car", "engine", "rpm"}, 1000, "rpm")
---
--- -- a more efficient way would be to keep the channel and directly publish to it:
--- local channel = m:getChannel({"car", "engine", "rpm"})
--- channel:publish(1000, "rpm")
-function Mediator:publish(channelNamespaces, ...)
-  return self:getChannel(channelNamespaces):publish(...)
-end
+do
+  local function recursive_publish(channelNamespaces, current_idx, current_channel, result, ...)
+    if current_idx == #channelNamespaces then
+      -- this is the target channel
+      return current_channel:_publish(result, false, ...)
+    end
 
+    -- first publish to the matching subchannel
+    local signal
+    local subChannel = current_channel:getChannel(channelNamespaces[current_idx+1])
+    result, signal = recursive_publish(channelNamespaces, current_idx+1, subChannel, result, ...)
+    if signal == STOP then
+      return result, STOP
+    end
+
+    -- publish to the matching wildcard subchannel
+    if current_channel:hasChannel(WILDCARD) then
+      local wildcardChannel = current_channel:getChannel(WILDCARD)
+      result, signal = recursive_publish(channelNamespaces, current_idx+1, wildcardChannel, result, ...)
+      if signal == STOP then
+        return result, STOP
+      end
+    end
+
+    -- finally publish to the current channel, marked as child-event
+    return current_channel:_publish(result, true, ...)
+  end
+
+  --- Publishes to a channel (and its parents).
+  -- @tparam array channelNamespaces The namespace-array of the channel to publish to (created if it doesn't exist).
+  -- @param ... The arguments to pass to the subscribers.
+  -- @treturn table The result table after all subscribers have been called.
+  -- @usage
+  -- local m = require("mediator")()
+  -- m:publish({"car", "engine", "rpm"}, 1000, "rpm")
+  function Mediator:publish(channelNamespaces, ...)
+    -- return self:getChannel(channelNamespaces):publish(...)
+    return recursive_publish(channelNamespaces, 0, self.channel, {}, ...)
+  end
+end
 
 
 --- Stops the mediator from calling the next subscriber.
@@ -439,6 +481,20 @@ Mediator.STOP = STOP
 --   return mediator.CONTINUE, result_data
 -- end)
 Mediator.CONTINUE = CONTINUE
+
+
+
+--- A wildcard value to be used in channel namespaces to match any namespace.
+-- *Note*: when using wildcards, the priority will be to always call the named channel first,
+-- and then the wildcard channel. So changing the priority of a subscriber has an effect
+-- within the named or wildcard channel, but not between them.
+-- @field WILDCARD
+-- @usage
+-- local sub = mediator:addSubscriber({"part1", mediator.WILDCARD, "part2"}, function()
+--   print('This will be called for {"part1", "anything", "part2"}')
+--   print('but also for: {"part1", "otherthing", "part2"}')
+-- end)
+Mediator.WILDCARD = WILDCARD
 
 
 
