@@ -39,7 +39,7 @@
 --
 -- *Callback results*
 --
--- Subscriber callback funcions can return 2 values:
+-- Subscriber callback functions can return 2 values:
 --
 -- 1. A signal to the mediator to stop or continue calling the next subscriber.
 -- Should be `mediator.CONTINUE` (default) or `mediator.STOP`.
@@ -56,7 +56,7 @@ local CONTINUE = {}
 
 
 --- Subscriber class.
--- This class is instantiated by the `mediator:subscribe` and `Channel:addSubscriber` methods.
+-- This class is instantiated by the `mediator:addSubscriber` and `Channel:addSubscriber` methods.
 -- @type Subscriber
 -- @usage
 -- local m = require("mediator")()
@@ -106,7 +106,7 @@ local Subscriber = setmetatable({},{
 
   -- Instantiates a new Subscriber object.
   -- @tparam function fn The callback function to be called when the channel is published to.
-  -- @tparam table options A table of options for the subscriber, see `mediator:subscribe` for fields.
+  -- @tparam table options A table of options for the subscriber, see `mediator:addSubscriber` for fields.
   -- @tparam Channel channel The channel the subscriber is subscribed to.
   -- @treturn Subscriber the newly created subscriber
   __call = function(self, fn, options, channel)
@@ -129,7 +129,7 @@ end
 --- Updates the subscriber with new options.
 -- @tparam table updates A table of updates options for the subscriber, with fields:
 -- @tparam[opt] function updates.fn The new callback function to be called when the channel is published to.
--- @tparam[opt] table updates.options The new options for the subscriber, see `mediator:subscribe` for fields.
+-- @tparam[opt] table updates.options The new options for the subscriber, see `mediator:addSubscriber` for fields.
 -- @return nothing
 function Subscriber:update(updates)
   if updates then
@@ -284,14 +284,21 @@ end
 -- Publishes to the channel.
 -- After publishing is complete, the parent channel will be published to as well.
 -- @tparam table result Return values (first only) from the callbacks will be stored in this table
+-- @tparam boolean isChildEvent Is this a child event for this channel?
 -- @param ... The arguments to pass to the subscribers.
 -- @treturn table The result table after all subscribers have been called.
-function Channel:_publish(result, ...)
+function Channel:_publish(result, isChildEvent, ...)
   for i, subscriber in ipairs(self.subscribers) do
     local ctx = subscriber.options.ctx
     local predicate = subscriber.options.predicate
+    local skipChildren = subscriber.options.skipChildren
     local shouldRun = true
-    if predicate then
+
+    if isChildEvent and skipChildren then
+      shouldRun = false
+    end
+
+    if shouldRun and predicate then
       if ctx ~= nil then
         shouldRun = predicate(ctx, ...)
       else
@@ -319,7 +326,7 @@ function Channel:_publish(result, ...)
   end
 
   if self.parent then
-    return self.parent:_publish(result, ...)
+    return self.parent:_publish(result, true, ...)
   else
     return result
   end
@@ -332,7 +339,7 @@ end
 -- @param ... The arguments to pass to the subscribers.
 -- @treturn table The result table after all subscribers have been called.
 function Channel:publish(...)
-  return self:_publish({}, ...)
+  return self:_publish({}, false, ...)
 end
 
 
@@ -377,7 +384,7 @@ end
 --- Subscribes to a channel.
 -- @tparam array channelNamespaces The namespace-array of the channel to subscribe to (created if it doesn't exist).
 -- @tparam function fn The callback function to be called when the channel is published to.
--- signature: `continueSignal, result = fn([ctx,] ...)` where `result` is any value to be stored in the result
+-- signature: <br/>`continueSignal, result = fn([ctx,] ...)`<br/> where `result` is any value to be stored in the result
 -- table and passed back to the publisher. `continueSignal` is a signal to the mediator to stop or continue
 -- calling the next subscriber, should be `mediator.STOP` or `mediator.CONTINUE` (default).
 -- @tparam table options A table of options for the subscriber, with fields:
@@ -386,6 +393,8 @@ end
 -- The predicate function will be passed the ctx + the arguments that were passed to the publish function.
 -- @tparam[opt] integer options.priority The priority of the subscriber. The lower the number,
 -- the higher the priority. Defaults to after all existing handlers.
+-- @tparam[opt] boolean options.skipChildren If `true`, the subscriber will only be invoked on direct
+-- publishes to this channel, but not for any child channels.
 -- @treturn Subscriber the newly created subscriber
 function Mediator:addSubscriber(channelNamespaces, fn, options)
   return self:getChannel(channelNamespaces):addSubscriber(fn, options)

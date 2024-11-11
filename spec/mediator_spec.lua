@@ -268,6 +268,31 @@ describe("mediator", function()
     assert.are.equal(olddata2, "didn't read lol")
   end)
 
+  it("allows subscribers to skip child messages", function()
+    local olddata = "wat"
+    local olddata2 = "watwat"
+
+    local assertFn = function(data)
+      olddata = data
+      return nil, true
+    end
+
+    local assertFn2 = function(data)
+      olddata2 = data
+      return nil, true
+    end
+
+    c:addChannel("level2")
+
+    m:addSubscriber({ "test", "level2" }, assertFn)
+    m:addSubscriber({ "test" }, assertFn2, { skipChildren = true })
+
+    m:publish({ "test", "level2" }, "didn't read lol")
+
+    assert.are.equal(olddata, "didn't read lol")
+    assert.are.equal(olddata2, "watwat")
+  end)
+
   it("has predicates", function()
     local olddata = "wat"
     local olddata2 = "watwat"

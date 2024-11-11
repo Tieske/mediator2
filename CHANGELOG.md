@@ -50,4 +50,4 @@ The scope of what is covered by the version number excludes:
   argument on each publish call, which also enables object-based handlers.
 - BREAKING: renamed `mediator:subscribe` to `mediator:addSubscriber` for consistency.
 - fix: addChannel no longer overwrites the existing one if it exists
-
+- feat: added an option for a subscriber to specify to NOT receive child messages
