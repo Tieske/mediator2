@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>mediator docs</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>mediator2</h1>
+
+
+
+
+
+<h2>Examples</h2>
+<ul class="nowrap">
+  <li><strong>mqtt.lua</strong></li>
+  <li><a href="../examples/object-oriented.lua.html">object-oriented.lua</a></li>
+</ul>
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../index.html">mediator</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="">
+  <li><a href="../topics/01-introduction.md.html">01-introduction</a></li>
+  <li><a href="../topics/CHANGELOG.md.html">CHANGELOG</a></li>
+  <li><a href="../topics/LICENSE.md.html">MIT License</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+    <h2>mqtt.lua</h2>
+<pre>
+<span class="comment">-- An example of using MQTT topics with the mediator
+</span><span class="keyword">local</span> mqttMediator = <span class="global">require</span>(<span class="string">"mediator2"</span>)()
+
+
+<span class="keyword">local</span> <span class="keyword">function</span> <span class="function-name">splitTopic</span>(str)
+  <span class="keyword">local</span> fields = {}
+  str:<span class="function-name">gsub</span>(<span class="string">"([^/]*)"</span>, <span class="keyword">function</span>(c) fields[#fields+<span class="number">1</span>] = c <span class="keyword">end</span>)
+  <span class="keyword">return</span> fields
+<span class="keyword">end</span>
+
+
+<span class="keyword">local</span> <span class="keyword">function</span> <span class="function-name">mqttPublish</span>(topic, ...)
+  <span class="keyword">return</span> mqttMediator:<span class="function-name">publish</span>(<span class="function-name">splitTopic</span>(topic, <span class="string">"/"</span>), ...)
+<span class="keyword">end</span>
+
+
+<span class="keyword">local</span> <span class="keyword">function</span> <span class="function-name">mqttSubscribe</span>(topic, handler, options)
+  <span class="keyword">local</span> segments = <span class="function-name">splitTopic</span>(topic, <span class="string">"/"</span>)
+  <span class="keyword">for</span> i, segment <span class="keyword">in</span> <span class="global">ipairs</span>(segments) <span class="keyword">do</span>
+    <span class="keyword">if</span> segment == <span class="string">"+"</span> <span class="keyword">then</span>
+      segments[i] = mqttMediator.WILDCARD
+    <span class="keyword">end</span>
+  <span class="keyword">end</span>
+
+  options = options <span class="keyword">or</span> {}
+
+  <span class="keyword">if</span> segments[#segments] == <span class="string">"#"</span> <span class="keyword">then</span>
+    segments[#segments] = mqttMediator.WILDCARD
+    options.skipChildren = <span class="keyword">false</span>
+  <span class="keyword">else</span>
+    options.skipChildren = <span class="keyword">true</span>
+  <span class="keyword">end</span>
+
+  <span class="keyword">return</span> mqttMediator:<span class="function-name">addSubscriber</span>(segments, handler, options)
+<span class="keyword">end</span>
+
+<span class="comment">-------------------------------------------------------------------------------
+</span><span class="comment">-- Let's test it!
+</span><span class="comment">-------------------------------------------------------------------------------
+</span>
+<span class="function-name">mqttSubscribe</span>(<span class="string">"foo/bar/baz"</span>, <span class="keyword">function</span>(...)
+  <span class="global">print</span>(<span class="string">"\tfoo/bar/baz: "</span>, ...)
+<span class="keyword">end</span>)
+
+<span class="function-name">mqttSubscribe</span>(<span class="string">"foo/+/baz"</span>, <span class="keyword">function</span>(...)
+  <span class="global">print</span>(<span class="string">"\tfoo/+/baz:   "</span>, ...)
+<span class="keyword">end</span>)
+
+<span class="function-name">mqttSubscribe</span>(<span class="string">"foo/bar/+"</span>, <span class="keyword">function</span>(...)
+  <span class="global">print</span>(<span class="string">"\tfoo/bar/+:   "</span>, ...)
+<span class="keyword">end</span>)
+
+<span class="function-name">mqttSubscribe</span>(<span class="string">"foo/#"</span>, <span class="keyword">function</span>(...)
+  <span class="global">print</span>(<span class="string">"\tfoo/#:       "</span>, ...)
+<span class="keyword">end</span>)
+
+<span class="global">print</span>(<span class="string">"foo/bar/baz"</span>)
+<span class="function-name">mqttPublish</span>(<span class="string">"foo/bar/baz"</span>, <span class="string">"hello to foo/bar/baz"</span>)
+<span class="global">print</span>(<span class="string">"foo/no-bar/baz"</span>)
+<span class="function-name">mqttPublish</span>(<span class="string">"foo/no-bar/baz"</span>, <span class="string">"hello to foo/no-bar/baz"</span>)
+<span class="global">print</span>(<span class="string">"foo//baz"</span>)
+<span class="function-name">mqttPublish</span>(<span class="string">"foo//baz"</span>, <span class="string">"hello to foo//baz"</span>) <span class="comment">-- empty segment
+</span><span class="global">print</span>(<span class="string">"foo/baz"</span>)
+<span class="function-name">mqttPublish</span>(<span class="string">"foo/baz"</span>, <span class="string">"hello to foo/baz"</span>)
+<span class="global">print</span>(<span class="string">"foo"</span>)
+<span class="function-name">mqttPublish</span>(<span class="string">"foo"</span>, <span class="string">"hello to foo"</span>)</pre>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2024-11-11 23:21:05 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

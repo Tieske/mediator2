@@ -48,6 +48,7 @@
 </ul>
 <h2>Examples</h2>
 <ul class="nowrap">
+  <li><a href="examples/mqtt.lua.html">mqtt.lua</a></li>
   <li><a href="examples/object-oriented.lua.html">object-oriented.lua</a></li>
 </ul>
 
@@ -142,12 +143,12 @@ mediator:<span class="function-name">addSubscriber</span>({<span class="string">
 	<td class="summary">Gets a single namespace/sub-channel from the current channel, or creates it if it doesn't exist.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Channel:hasChannel">Channel:hasChannel (namespace)</a></td>
-	<td class="summary">Checks if a single namespace/sub-channel exists within the current channel.</td>
+	<td class="name" nowrap><a href="#Channel:getNamespaces">Channel:getNamespaces ()</a></td>
+	<td class="summary">Gets the full namespace array for the current channel.</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Channel:publish">Channel:publish (...)</a></td>
-	<td class="summary">Publishes to the channel.</td>
+	<td class="name" nowrap><a href="#Channel:hasChannel">Channel:hasChannel (namespace)</a></td>
+	<td class="summary">Checks if a single namespace/sub-channel exists within the current channel.</td>
 	</tr>
 </table>
 <h2><a href="#Class_Mediator">Class Mediator </a></h2>
@@ -159,6 +160,10 @@ mediator:<span class="function-name">addSubscriber</span>({<span class="string">
 	<tr>
 	<td class="name" nowrap><a href="#Mediator.STOP">Mediator.STOP</a></td>
 	<td class="summary">Stops the mediator from calling the next subscriber.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Mediator.WILDCARD">Mediator.WILDCARD</a></td>
+	<td class="summary">A wildcard value to be used in channel namespaces to match any namespace.</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#Mediator:addSubscriber">Mediator:addSubscriber (channelNamespaces, fn, options)</a></td>
@@ -182,7 +187,7 @@ mediator:<span class="function-name">addSubscriber</span>({<span class="string">
 
           <div class="section-description">
           Subscriber class.
- This class is instantiated by the <code>mediator:subscribe</code> and <a href="index.html#Channel:addSubscriber">Channel:addSubscriber</a> methods.
+ This class is instantiated by the <a href="index.html#Channel:addSubscriber">mediator:addSubscriber</a> and <a href="index.html#Channel:addSubscriber">Channel:addSubscriber</a> methods.
           </div>
             <h3>Usage:</h3>
             <pre class="example"><span class="keyword">local</span> m = <span class="global">require</span>(<span class="string">"mediator"</span>)()
@@ -292,7 +297,7 @@ m:<span class="function-name">publish</span>({<span class="string">"car"</span>,
         </li>
         <li><span class="parameter">options</span>
             <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
-         The new options for the subscriber, see <code>mediator:subscribe</code> for fields.
+         The new options for the subscriber, see <a href="index.html#Channel:addSubscriber">mediator:addSubscriber</a> for fields.
          (<em>optional</em>)
         </li>
         </li></ul>
@@ -404,6 +409,26 @@ m:<span class="function-name">publish</span>({<span class="string">"car"</span>,
 
 </dd>
     <dt>
+    <a name = "Channel:getNamespaces"></a>
+    <strong>Channel:getNamespaces ()</strong>
+    </dt>
+    <dd>
+    Gets the full namespace array for the current channel.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">Array</span></span>
+        the full namespace array
+    </ol>
+
+
+
+
+</dd>
+    <dt>
     <a name = "Channel:hasChannel"></a>
     <strong>Channel:hasChannel (namespace)</strong>
     </dt>
@@ -424,33 +449,6 @@ m:<span class="function-name">publish</span>({<span class="string">"car"</span>,
 
            <span class="types"><span class="type">boolean</span></span>
         <code>true</code> if the channel exists, <code>false</code> otherwise
-    </ol>
-
-
-
-
-</dd>
-    <dt>
-    <a name = "Channel:publish"></a>
-    <strong>Channel:publish (...)</strong>
-    </dt>
-    <dd>
-    Publishes to the channel.
- After publishing is complete, the parent channel will be published to as well.
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">...</span>
-         The arguments to pass to the subscribers.
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
-        The result table after all subscribers have been called.
     </ol>
 
 
@@ -523,6 +521,37 @@ m:<span class="function-name">publish</span>({<span class="string">"car"</span>,
 
 </dd>
     <dt>
+    <a name = "Mediator.WILDCARD"></a>
+    <strong>Mediator.WILDCARD</strong>
+    </dt>
+    <dd>
+    A wildcard value to be used in channel namespaces to match any namespace.
+ <em>Note</em>: when using wildcards, the priority will be to always call the named channel first,
+ and then the wildcard channel. So changing the priority of a subscriber has an effect
+ within the named or wildcard channel, but not between them.
+
+
+    <ul>
+        <li><span class="parameter">WILDCARD</span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+    <h3>Usage:</h3>
+    <ul>
+        <pre class="example"><span class="keyword">local</span> sub = mediator:<span class="function-name">addSubscriber</span>({<span class="string">"part1"</span>, mediator.WILDCARD, <span class="string">"part2"</span>}, <span class="keyword">function</span>()
+  <span class="global">print</span>(<span class="string">'This will be called for {"part1", "anything", "part2"}'</span>)
+  <span class="global">print</span>(<span class="string">'but also for: {"part1", "otherthing", "part2"}'</span>)
+<span class="keyword">end</span>)</pre>
+    </ul>
+
+</dd>
+    <dt>
     <a name = "Mediator:addSubscriber"></a>
     <strong>Mediator:addSubscriber (channelNamespaces, fn, options)</strong>
     </dt>
@@ -539,7 +568,7 @@ m:<span class="function-name">publish</span>({<span class="string">"car"</span>,
         <li><span class="parameter">fn</span>
             <span class="types"><span class="type">function</span></span>
          The callback function to be called when the channel is published to.
- signature: <code>continueSignal, result = fn([ctx,] ...)</code> where <code>result</code> is any value to be stored in the result
+ signature: <br/><code>continueSignal, result = fn([ctx,] ...)</code><br/> where <code>result</code> is any value to be stored in the result
  table and passed back to the publisher. <code>continueSignal</code> is a signal to the mediator to stop or continue
  calling the next subscriber, should be <a href="index.html#Mediator.STOP">mediator.STOP</a> or <a href="index.html#Mediator.CONTINUE">mediator.CONTINUE</a> (default).
         </li>
@@ -645,11 +674,7 @@ m:<span class="function-name">publish</span>({<span class="string">"car"</span>,
     <h3>Usage:</h3>
     <ul>
         <pre class="example"><span class="keyword">local</span> m = <span class="global">require</span>(<span class="string">"mediator"</span>)()
-m:<span class="function-name">publish</span>({<span class="string">"car"</span>, <span class="string">"engine"</span>, <span class="string">"rpm"</span>}, <span class="number">1000</span>, <span class="string">"rpm"</span>)
-
-<span class="comment">-- a more efficient way would be to keep the channel and directly publish to it:
-</span><span class="keyword">local</span> channel = m:<span class="function-name">getChannel</span>({<span class="string">"car"</span>, <span class="string">"engine"</span>, <span class="string">"rpm"</span>})
-channel:<span class="function-name">publish</span>(<span class="number">1000</span>, <span class="string">"rpm"</span>)</pre>
+m:<span class="function-name">publish</span>({<span class="string">"car"</span>, <span class="string">"engine"</span>, <span class="string">"rpm"</span>}, <span class="number">1000</span>, <span class="string">"rpm"</span>)</pre>
     </ul>
 
 </dd>
@@ -660,7 +685,7 @@ channel:<span class="function-name">publish</span>(<span class="number">1000</sp
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
-<i style="float:right;">Last updated 2024-11-11 01:56:05 </i>
+<i style="float:right;">Last updated 2024-11-11 23:21:05 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
