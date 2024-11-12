@@ -190,6 +190,16 @@ describe("mediator", function()
     assert.is.error(function() c:publish({}) end)
   end)
 
+  it("fails if propagation is neither STOP nor CONTINUE 2", function()
+    local function assertFn(data)
+      return nil, "wat"
+    end
+
+    c:addSubscriber(assertFn)
+
+    assert.is.error(function() c:publish({}) end)
+  end)
+
   it("publishes to parent channels", function()
     local olddata = { test = false }
     local data = { test = true }
@@ -254,12 +264,12 @@ describe("mediator", function()
 
     local assertFn = function(data)
       olddata = data
-      return nil, true
+      return m.CONTINUE, true
     end
 
     local assertFn2 = function(data)
       olddata2 = data
-      return nil, true
+      return m.CONTINUE, true
     end
 
     c:addChannel("level2")
@@ -279,12 +289,12 @@ describe("mediator", function()
 
     local assertFn = function(data)
       olddata = data
-      return nil, true
+      return m.CONTINUE, true
     end
 
     local assertFn2 = function(data)
       olddata2 = data
-      return nil, true
+      return m.CONTINUE, true
     end
 
     c:addChannel("level2")

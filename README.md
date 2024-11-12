@@ -7,7 +7,7 @@
 
 mediator2 allows you to subscribe and publish to a central object so
 you can decouple function calls in your application. It's as simple as
-`mediator:addSsubscriber({"channel"}, function)`. Supports namespacing, predicates,
+`mediator:addSubscriber({"channel"}, function)`. Supports namespacing, predicates,
 and more.
 
 ## License and copyright

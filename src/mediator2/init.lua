@@ -305,12 +305,12 @@ end
 
 
 -- Publishes to this channel.
--- @tparam table result Return values (first only) from the callbacks will be stored in this table
+-- @tparam table results Return values (first only) from the callbacks will be stored in this table
 -- @tparam boolean isChildEvent Is this a child event for this channel?
 -- @param ... The arguments to pass to the subscribers.
 -- @treturn table The result table after all subscribers have been called.
 -- @treturn signal Either `mediator.STOP`, or `mediator.CONTINUE`
-function Channel:_publish(result, isChildEvent, ...)
+function Channel:_publish(results, isChildEvent, ...)
   for i, subscriber in ipairs(self.subscribers) do
     local ctx = subscriber.options.ctx
     local predicate = subscriber.options.predicate
@@ -330,16 +330,22 @@ function Channel:_publish(result, isChildEvent, ...)
     end
 
     if shouldRun then
-      local continue
+      local continue, result
       if ctx ~= nil then
-        continue, result[#result+1] = subscriber.fn(ctx, ...)
+        continue, result = subscriber.fn(ctx, ...)
       else
-        continue, result[#result+1] = subscriber.fn(...)
+        continue, result = subscriber.fn(...)
       end
-      if continue ~= nil then
+      results[#results+1] = result
+
+      if (continue == nil) and (result == nil) then
+        continue = CONTINUE
+      end
+
+      if continue ~= CONTINUE then
         if continue == STOP then
-          return result, STOP
-        elseif continue ~= CONTINUE then
+          return results, STOP
+        else
           local info = debug.getinfo(subscriber.fn)
           local err = ("Invalid return value from subscriber%s:%s, expected mediator.STOP or mediator.CONTINUE"):format(info.source, info.linedefined)
           error(err)
@@ -348,7 +354,7 @@ function Channel:_publish(result, isChildEvent, ...)
     end
   end
 
-  return result, CONTINUE
+  return results, CONTINUE
 end
 
 
@@ -455,7 +461,6 @@ do
   -- local m = require("mediator")()
   -- m:publish({"car", "engine", "rpm"}, 1000, "rpm")
   function Mediator:publish(channelNamespaces, ...)
-    -- return self:getChannel(channelNamespaces):publish(...)
     return recursive_publish(channelNamespaces, 0, self.channel, {}, ...)
   end
 end
