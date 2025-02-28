@@ -120,9 +120,9 @@ local Subscriber = setmetatable({},{
 })
 
 function Subscriber:__index(key)
-if key == "id" then error("id is gone...") end
-  self[key] = Subscriber[key] -- copy method to instance for faster future access
-  return Subscriber[key]
+  local val = Subscriber[key]
+  self[key] = val -- copy method to instance for faster future access
+  return val
 end
 
 
@@ -200,8 +200,9 @@ local Channel = setmetatable({}, {
 })
 
 function Channel:__index(key)
-  self[key] = Channel[key] -- copy method to instance for faster future access
-  return Channel[key]
+  local val = Channel[key]
+  self[key] = val -- copy method to instance for faster future access
+  return val
 end
 
 
@@ -249,6 +250,7 @@ function Channel:_setPriority(subscriber, priority)
   table.insert(self.subscribers, priority, subscriber)
   return priority
 end
+
 
 
 --- Adds a single namespace/sub-channel to the current channel.
@@ -381,9 +383,11 @@ local Mediator = setmetatable({},{
 })
 
 function Mediator:__index(key)
-  self[key] = Mediator[key] -- copy method to instance for faster future access
-  return Mediator[key]
+  local val = Mediator[key]
+  self[key] = val -- copy method to instance for faster future access
+  return val
 end
+
 
 
 --- Gets a channel by its namespaces, or creates them if they don't exist.
@@ -453,6 +457,8 @@ do
     return current_channel:_publish(result, true, ...)
   end
 
+
+
   --- Publishes to a channel (and its parents).
   -- @tparam array channelNamespaces The namespace-array of the channel to publish to (created if it doesn't exist).
   -- @param ... The arguments to pass to the subscribers.
@@ -464,6 +470,7 @@ do
     return recursive_publish(channelNamespaces, 0, self.channel, {}, ...)
   end
 end
+
 
 
 --- Stops the mediator from calling the next subscriber.

@@ -1,6 +1,6 @@
 -- using `ctx` to pass `self` to the callback function.
 
-local Mediator = require 'mediator'
+local Mediator = require 'mediator2'
 local m = Mediator()
 
 

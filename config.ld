@@ -1,5 +1,5 @@
 project='mediator2'
-title='mediator docs'
+title='mediator2 docs'
 description='mediator2 is a Lua implementation of the Mediator pattern.'
 
 format='markdown'

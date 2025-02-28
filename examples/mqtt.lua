@@ -9,13 +9,15 @@ local function splitTopic(str)
 end
 
 
+--- Publish an incoming MQTT message to the Mediator subscribers
 local function mqttPublish(topic, ...)
-  return mqttMediator:publish(splitTopic(topic, "/"), ...)
+  return mqttMediator:publish(splitTopic(topic), ...)
 end
 
 
+--- Create a Mediator subscriber to listen for incoming MQTT topics
 local function mqttSubscribe(topic, handler, options)
-  local segments = splitTopic(topic, "/")
+  local segments = splitTopic(topic)
   for i, segment in ipairs(segments) do
     if segment == "+" then
       segments[i] = mqttMediator.WILDCARD
