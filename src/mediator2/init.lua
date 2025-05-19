@@ -4,7 +4,7 @@
 --
 --     mediator:addSubscriber({"channel"}, function)
 --
--- Supports namespacing, predicates,
+-- Supports namespacing, predicates, wildcards,
 -- and more.
 --
 -- __Some basics__:
@@ -22,6 +22,8 @@
 -- Channels have a tree structure, where each channel can have multiple sub-channels.
 -- When publishing to a channel, the parent channel will be published to as well.
 -- Channels are automatically created when subscribing or publishing to them.
+-- Technically the channel is implemented as an array of namespaces, for example:
+-- `{"car", "engine", "rpm"}`
 --
 -- *Context*
 --
@@ -415,7 +417,7 @@ end
 -- table and passed back to the publisher. `continueSignal` is a signal to the mediator to stop or continue
 -- calling the next subscriber, should be `mediator.STOP` or `mediator.CONTINUE` (default).
 -- @tparam table options A table of options for the subscriber, with fields:
--- @tparam[opt] function options.ctx The context to call the subscriber with, will be omitted from the callback if `nil`.
+-- @tparam[opt] any options.ctx The context to call the subscriber with, will be omitted from the callback if `nil`.
 -- @tparam[opt] function options.predicate A function that returns a boolean. If `true`, the subscriber will be called.
 -- The predicate function will be passed the ctx + the arguments that were passed to the publish function.
 -- @tparam[opt] integer options.priority The priority of the subscriber. The lower the number,
