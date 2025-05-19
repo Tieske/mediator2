@@ -33,7 +33,7 @@ jobs:
 
     - uses: hishamhm/gh-actions-luarocks@master
       with:
-        luarocksVersion: "3.11.0"
+        luaRocksVersion: "3.11.0"
 
     - name: dependencies
       # install test deps, but remove default 'mediator2' package
