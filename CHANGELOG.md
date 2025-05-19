@@ -18,8 +18,8 @@ The scope of what is covered by the version number excludes:
   header, and in module constants)
 - create a new rockspec and update the version inside the new rockspec:<br/>
   `cp mediator2-dev-1.rockspec ./rockspecs/mediator2-X.Y.Z-1.rockspec`
-- test: run `busted` and `luacheck .`
-- render the docs: run `ldoc .`
+- test: run `make test` and `make lint`
+- render the docs: run `make docs`
 - commit the changes as `release X.Y.Z`
 - push the commit, and create a release PR
 - after merging tag the release commit with `vX.Y.Z`
@@ -30,7 +30,7 @@ The scope of what is covered by the version number excludes:
 
 ## Version history
 
-### Version 2.0.0, unreleased
+### Version 2.0.0, 19-May-2025
 
 - Forked from the [Olivine-Labs original](https://github.com/Olivine-Labs/mediator_lua)
 - fix: ci moved to Github Actions

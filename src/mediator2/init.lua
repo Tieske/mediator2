@@ -48,7 +48,9 @@
 -- 2. Any value to be stored in the result table and passed back to the publisher.
 --
 -- @module mediator
-
+-- @release 2.0.0
+-- @license MIT
+-- @copyright Copyright (c) 2012-2020 Olivine Labs, 2024-2025 Thijs Schreijer
 
 
 -- signals to be returned by the subscriber to tell the mediator to stop or continue
@@ -56,6 +58,12 @@ local STOP = {}
 local CONTINUE = {}
 local WILDCARD = {}
 
+
+local Mediator = {
+  _COPYRIGHT   = "Copyright (c) 2012-2020 Olivine Labs, 2024-2025 Thijs Schreijer",
+  _DESCRIPTION = "Mediator pattern implementation",
+  _VERSION     = "2.0.0",
+}
 
 
 --- Subscriber class.
@@ -376,7 +384,7 @@ end
 -- This class is instantiated by calling on the module table.
 -- @type Mediator
 
-local Mediator = setmetatable({},{
+Mediator = setmetatable(Mediator,{
   __call = function(self)
     local med = {}
     med.channel = Channel('root', nil, med)
