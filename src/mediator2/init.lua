@@ -105,7 +105,7 @@ local Mediator = {
 --     ctx.count = ctx.count + 1
 --     print("Sub3 ", ctx.count, value, unit)
 --     return m.STOP, count     -- stop the mediator from calling the next subscriber
---   end)
+--   end, options)
 --
 -- local results = m:publish({"car", "engine", "rpm"}, 1000, "rpm")
 -- -- Output:
@@ -371,7 +371,7 @@ end
 
 
 
--- Publishes to this channel.
+--- Publishes to this channel.
 -- @param ... The arguments to pass to the subscribers.
 -- @treturn table The result table after all subscribers have been called.
 function Channel:publish(...)
