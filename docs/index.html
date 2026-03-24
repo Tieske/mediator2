@@ -158,6 +158,10 @@ mediator:<span class="function-name">addSubscriber</span>({<span class="string">
 	<td class="name" nowrap><a href="#Channel:hasChannel">Channel:hasChannel (namespace)</a></td>
 	<td class="summary">Checks if a single namespace/sub-channel exists within the current channel.</td>
 	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Channel:publish">Channel:publish (...)</a></td>
+	<td class="summary">Publishes to this channel.</td>
+	</tr>
 </table>
 <h2><a href="#Class_Mediator">Class Mediator </a></h2>
 <table class="function_list">
@@ -233,7 +237,7 @@ m:<span class="function-name">publish</span>({<span class="string">"car"</span>,
     ctx.count = ctx.count + <span class="number">1</span>
     <span class="global">print</span>(<span class="string">"Sub3 "</span>, ctx.count, value, unit)
     <span class="keyword">return</span> m.STOP, count     <span class="comment">-- stop the mediator from calling the next subscriber
-</span>  <span class="keyword">end</span>)
+</span>  <span class="keyword">end</span>, options)
 
 <span class="keyword">local</span> results = m:<span class="function-name">publish</span>({<span class="string">"car"</span>, <span class="string">"engine"</span>, <span class="string">"rpm"</span>}, <span class="number">1000</span>, <span class="string">"rpm"</span>)
 <span class="comment">-- Output:
@@ -304,7 +308,7 @@ m:<span class="function-name">publish</span>({<span class="string">"car"</span>,
          (<em>optional</em>)
         </li>
         <li><span class="parameter">options</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
          The new options for the subscriber, see <a href="index.html#Mediator:addSubscriber">mediator:addSubscriber</a> for fields.
          (<em>optional</em>)
         </li>
@@ -342,7 +346,7 @@ m:<span class="function-name">publish</span>({<span class="string">"car"</span>,
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">namespace</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
          The namespace of the channel to add.
         </li>
     </ul>
@@ -373,7 +377,7 @@ m:<span class="function-name">publish</span>({<span class="string">"car"</span>,
          The callback function to be called when the channel is published to.
         </li>
         <li><span class="parameter">options</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
          A table of options for the subscriber. See <code>mediator:subscribe</code> for fields.
         </li>
     </ul>
@@ -400,7 +404,7 @@ m:<span class="function-name">publish</span>({<span class="string">"car"</span>,
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">namespace</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
          The namespace of the channel to get.
         </li>
     </ul>
@@ -447,7 +451,7 @@ m:<span class="function-name">publish</span>({<span class="string">"car"</span>,
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">namespace</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.4">string</a></span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
          The namespace of the channel to check.
         </li>
     </ul>
@@ -457,6 +461,32 @@ m:<span class="function-name">publish</span>({<span class="string">"car"</span>,
 
            <span class="types"><span class="type">boolean</span></span>
         <code>true</code> if the channel exists, <code>false</code> otherwise
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Channel:publish"></a>
+    <strong>Channel:publish (...)</strong>
+    </dt>
+    <dd>
+    Publishes to this channel.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">...</span>
+         The arguments to pass to the subscribers.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+        The result table after all subscribers have been called.
     </ol>
 
 
@@ -673,7 +703,7 @@ m:<span class="function-name">publish</span>({<span class="string">"car"</span>,
     <h3>Returns:</h3>
     <ol>
 
-           <span class="types"><a class="type" href="https://www.lua.org/manual/5.4/manual.html#6.6">table</a></span>
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
         The result table after all subscribers have been called.
     </ol>
 
@@ -692,7 +722,8 @@ m:<span class="function-name">publish</span>({<span class="string">"car"</span>,
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
-<i>generated by <a href="http://github.com/lunarmodules/LDoc">LDoc 1.5.0</a></i>
+<i>generated by <a href="http://github.com/lunarmodules/ldoc">LDoc 1.5.0</a></i>
+<i style="float:right;">Last updated 2026-03-24 14:27:06 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
